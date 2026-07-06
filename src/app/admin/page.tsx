@@ -14,8 +14,9 @@ export default async function AdminPage() {
 
   try {
     works = await listCompanyWorkItems();
-  } catch {
+  } catch (error) {
     databaseError = true;
+    console.error("[admin] Failed to load company work items", error);
   }
 
   return (

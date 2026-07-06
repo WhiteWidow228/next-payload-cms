@@ -1,4 +1,4 @@
-﻿import { Pool } from "pg";
+import { Pool } from "pg";
 
 type TeamMember = {
   name: string;
@@ -21,14 +21,63 @@ export type CompanyWorkItem = {
 
 export type CompanyWorkInput = Omit<CompanyWorkItem, "id">;
 
+const DATABASE_ENV_KEYS = [
+  "DATABASE_URI",
+  "DATABASE_URL",
+  "POSTGRES_URL",
+  "POSTGRES_PRISMA_URL",
+  "POSTGRES_URL_NON_POOLING",
+] as const;
+
+const LOCAL_DATABASE_URI = "postgres://postgres:123321@localhost:5432/core_devs_cms";
+
 const globalForDb = globalThis as unknown as { coreDevsPool?: Pool };
+
+function cleanConnectionString(value?: string) {
+  let connectionString = value?.trim() || "";
+
+  if (!connectionString) {
+    return "";
+  }
+
+  const assignment = connectionString.match(
+    /^(DATABASE_URI|DATABASE_URL|POSTGRES_URL|POSTGRES_PRISMA_URL|POSTGRES_URL_NON_POOLING)\s*=\s*(.+)$/,
+  );
+
+  if (assignment) {
+    connectionString = assignment[2].trim();
+  }
+
+  if (
+    (connectionString.startsWith('"') && connectionString.endsWith('"')) ||
+    (connectionString.startsWith("'") && connectionString.endsWith("'"))
+  ) {
+    connectionString = connectionString.slice(1, -1);
+  }
+
+  return connectionString;
+}
+
+function getConnectionString() {
+  for (const key of DATABASE_ENV_KEYS) {
+    const connectionString = cleanConnectionString(process.env[key]);
+
+    if (connectionString) {
+      return connectionString;
+    }
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return LOCAL_DATABASE_URI;
+  }
+
+  throw new Error(`Postgres connection string is not configured. Add one of: ${DATABASE_ENV_KEYS.join(", ")}`);
+}
 
 export const db =
   globalForDb.coreDevsPool ||
   new Pool({
-    connectionString:
-      process.env.DATABASE_URI ||
-      "postgres://postgres:123321@localhost:5432/core_devs_cms",
+    connectionString: getConnectionString(),
   });
 
 if (process.env.NODE_ENV !== "production") {
@@ -213,4 +262,3 @@ export async function deleteCompanyWorkItem(id: number) {
   await ensureCompanyWorkTable();
   await db.query("DELETE FROM company_work_items WHERE id = $1", [id]);
 }
-
