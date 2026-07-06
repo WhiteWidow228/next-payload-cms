@@ -30,6 +30,8 @@ const DATABASE_ENV_KEYS = [
 ] as const;
 
 const LOCAL_DATABASE_URI = "postgres://postgres:123321@localhost:5432/core_devs_cms";
+const DEFAULT_CTA_LABEL = "\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c \u0441\u043c\u0435\u0442\u0443";
+const DEFAULT_TEAM_MEMBER_NAME = "\u0423\u0447\u0430\u0441\u0442\u043d\u0438\u043a \u043a\u043e\u043c\u0430\u043d\u0434\u044b";
 
 const globalForDb = globalThis as unknown as { coreDevsPool?: Pool };
 
@@ -74,18 +76,18 @@ function getConnectionString() {
   throw new Error(`Postgres connection string is not configured. Add one of: ${DATABASE_ENV_KEYS.join(", ")}`);
 }
 
-export const db =
-  globalForDb.coreDevsPool ||
-  new Pool({
-    connectionString: getConnectionString(),
-  });
+function getDb() {
+  if (!globalForDb.coreDevsPool) {
+    globalForDb.coreDevsPool = new Pool({
+      connectionString: getConnectionString(),
+    });
+  }
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.coreDevsPool = db;
+  return globalForDb.coreDevsPool;
 }
 
 export async function ensureCompanyWorkTable() {
-  await db.query(`
+  await getDb().query(`
     CREATE TABLE IF NOT EXISTS company_work_items (
       id SERIAL PRIMARY KEY,
       title TEXT NOT NULL,
@@ -96,7 +98,7 @@ export async function ensureCompanyWorkTable() {
       image_alt TEXT NOT NULL DEFAULT '',
       technologies TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
       team_members JSONB NOT NULL DEFAULT '[]'::JSONB,
-      cta_label TEXT NOT NULL DEFAULT 'Рассчитать смету',
+      cta_label TEXT NOT NULL DEFAULT '\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c \u0441\u043c\u0435\u0442\u0443',
       sort_order INTEGER NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -116,7 +118,7 @@ function normalizeTeamMembers(value: unknown): TeamMember[] {
       }
 
       const item = member as Partial<TeamMember>;
-      const name = item.name?.trim() || `Участник команды ${index + 1}`;
+      const name = item.name?.trim() || `${DEFAULT_TEAM_MEMBER_NAME} ${index + 1}`;
       const avatar = item.avatar?.trim() || `/assets/avatar-${(index % 6) + 1}.png`;
 
       return { name, avatar };
@@ -135,7 +137,7 @@ function mapCompanyWork(row: Record<string, unknown>): CompanyWorkItem {
     imageAlt: String(row.imageAlt || row.image_alt || ""),
     technologies: Array.isArray(row.technologies) ? row.technologies.map(String) : [],
     teamMembers: normalizeTeamMembers(row.teamMembers || row.team_members),
-    ctaLabel: String(row.ctaLabel || row.cta_label || "Рассчитать смету"),
+    ctaLabel: String(row.ctaLabel || row.cta_label || DEFAULT_CTA_LABEL),
     sortOrder: Number(row.sortOrder || row.sort_order || 0),
   };
 }
@@ -143,7 +145,7 @@ function mapCompanyWork(row: Record<string, unknown>): CompanyWorkItem {
 export async function listCompanyWorkItems() {
   await ensureCompanyWorkTable();
 
-  const result = await db.query(`
+  const result = await getDb().query(`
     SELECT
       id,
       title,
@@ -166,7 +168,7 @@ export async function listCompanyWorkItems() {
 export async function getCompanyWorkItem(id: number) {
   await ensureCompanyWorkTable();
 
-  const result = await db.query(
+  const result = await getDb().query(
     `
       SELECT
         id,
@@ -192,7 +194,7 @@ export async function getCompanyWorkItem(id: number) {
 export async function createCompanyWorkItem(input: CompanyWorkInput) {
   await ensureCompanyWorkTable();
 
-  await db.query(
+  await getDb().query(
     `
       INSERT INTO company_work_items (
         title,
@@ -225,7 +227,7 @@ export async function createCompanyWorkItem(input: CompanyWorkInput) {
 export async function updateCompanyWorkItem(id: number, input: CompanyWorkInput) {
   await ensureCompanyWorkTable();
 
-  await db.query(
+  await getDb().query(
     `
       UPDATE company_work_items
       SET
@@ -260,5 +262,5 @@ export async function updateCompanyWorkItem(id: number, input: CompanyWorkInput)
 
 export async function deleteCompanyWorkItem(id: number) {
   await ensureCompanyWorkTable();
-  await db.query("DELETE FROM company_work_items WHERE id = $1", [id]);
+  await getDb().query("DELETE FROM company_work_items WHERE id = $1", [id]);
 }
