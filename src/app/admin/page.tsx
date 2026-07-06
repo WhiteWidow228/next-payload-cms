@@ -2,7 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { listCompanyWorkItems, type CompanyWorkItem } from "@/lib/db";
+import {
+  getDatabaseEnvSummary,
+  getDatabaseErrorMessage,
+  listCompanyWorkItems,
+  type CompanyWorkItem,
+} from "@/lib/db";
 
 export default async function AdminPage() {
   if (!(await isAdminAuthenticated())) {
@@ -10,12 +15,13 @@ export default async function AdminPage() {
   }
 
   let works: CompanyWorkItem[] = [];
-  let databaseError = false;
+  let databaseError: string | null = null;
+  const databaseEnv = getDatabaseEnvSummary();
 
   try {
     works = await listCompanyWorkItems();
   } catch (error) {
-    databaseError = true;
+    databaseError = getDatabaseErrorMessage(error);
     console.error("[admin] Failed to load company work items", error);
   }
 
@@ -44,9 +50,12 @@ export default async function AdminPage() {
 
         {databaseError ? (
           <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-8 text-red-100">
-            <h2 className="text-xl font-black uppercase">База данных не подключилась</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-red-100/75">
-              Админка открылась, но не смогла получить работы из Postgres. Проверь в Vercel переменную DATABASE_URI и сделай Redeploy проекта.
+            <h2 className="text-xl font-black uppercase">Работы не загрузились из Postgres</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-red-100/75">{databaseError}</p>
+            <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-red-100/45">
+              Источник: {databaseEnv.source}
+              {databaseEnv.host ? ` · ${databaseEnv.host}` : ""}
+              {databaseEnv.database ? ` · ${databaseEnv.database}` : ""}
             </p>
           </div>
         ) : works.length ? (

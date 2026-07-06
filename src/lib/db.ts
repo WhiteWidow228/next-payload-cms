@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 
 type TeamMember = {
   name: string;
@@ -20,6 +20,14 @@ export type CompanyWorkItem = {
 };
 
 export type CompanyWorkInput = Omit<CompanyWorkItem, "id">;
+
+type DatabaseEnvSource = (typeof DATABASE_ENV_KEYS)[number] | "local" | "missing";
+
+type DatabaseEnvSummary = {
+  source: DatabaseEnvSource;
+  host: string;
+  database: string;
+};
 
 const DATABASE_ENV_KEYS = [
   "DATABASE_URI",
@@ -60,30 +68,106 @@ function cleanConnectionString(value?: string) {
   return connectionString;
 }
 
-function getConnectionString() {
+function resolveConnectionString() {
   for (const key of DATABASE_ENV_KEYS) {
     const connectionString = cleanConnectionString(process.env[key]);
 
     if (connectionString) {
-      return connectionString;
+      return { connectionString, source: key };
     }
   }
 
   if (process.env.NODE_ENV !== "production") {
-    return LOCAL_DATABASE_URI;
+    return { connectionString: LOCAL_DATABASE_URI, source: "local" as const };
+  }
+
+  return { connectionString: "", source: "missing" as const };
+}
+
+function getConnectionString() {
+  const { connectionString } = resolveConnectionString();
+
+  if (connectionString) {
+    return connectionString;
   }
 
   throw new Error(`Postgres connection string is not configured. Add one of: ${DATABASE_ENV_KEYS.join(", ")}`);
 }
 
+function shouldUseSsl(connectionString: string) {
+  return /neon\.tech|sslmode=require|sslmode=verify-full|sslmode=verify-ca/i.test(connectionString);
+}
+
+function getPoolConfig(): PoolConfig {
+  const connectionString = getConnectionString();
+
+  return {
+    connectionString,
+    connectionTimeoutMillis: 10000,
+    idleTimeoutMillis: 30000,
+    max: 3,
+    ssl: shouldUseSsl(connectionString) ? { rejectUnauthorized: false } : undefined,
+  };
+}
+
 function getDb() {
   if (!globalForDb.coreDevsPool) {
-    globalForDb.coreDevsPool = new Pool({
-      connectionString: getConnectionString(),
-    });
+    globalForDb.coreDevsPool = new Pool(getPoolConfig());
   }
 
   return globalForDb.coreDevsPool;
+}
+
+export function getDatabaseEnvSummary(): DatabaseEnvSummary {
+  const { connectionString, source } = resolveConnectionString();
+
+  if (!connectionString) {
+    return { source, host: "", database: "" };
+  }
+
+  try {
+    const url = new URL(connectionString);
+
+    return {
+      source,
+      host: url.hostname,
+      database: url.pathname.replace(/^\//, ""),
+    };
+  } catch {
+    return { source, host: "не удалось прочитать", database: "не удалось прочитать" };
+  }
+}
+
+export function getDatabaseErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+  const lowerMessage = message.toLowerCase();
+
+  if (lowerMessage.includes("connection string is not configured")) {
+    return `В Vercel не задана переменная базы. Добавь одну из: ${DATABASE_ENV_KEYS.join(", ")}.`;
+  }
+
+  if (lowerMessage.includes("password authentication failed") || lowerMessage.includes("authentication failed")) {
+    return "Postgres отклонил логин или пароль. Проверь актуальную строку подключения Neon в переменных Vercel.";
+  }
+
+  if (lowerMessage.includes("enotfound") || lowerMessage.includes("getaddrinfo")) {
+    return "Vercel не смог найти host Postgres. Проверь, что строка подключения скопирована полностью.";
+  }
+
+  if (
+    lowerMessage.includes("timeout") ||
+    lowerMessage.includes("etimedout") ||
+    lowerMessage.includes("econnrefused") ||
+    lowerMessage.includes("connection terminated")
+  ) {
+    return "Postgres не ответил вовремя. Проверь Neon, SSL-параметры и что база не в паузе.";
+  }
+
+  if (lowerMessage.includes("ssl") || lowerMessage.includes("certificate")) {
+    return "Postgres вернул ошибку SSL. Для Neon включён явный SSL-режим, сделай Redeploy последнего коммита.";
+  }
+
+  return `Postgres вернул ошибку: ${message}`;
 }
 
 export async function ensureCompanyWorkTable() {
