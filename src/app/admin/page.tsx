@@ -2,14 +2,21 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { listCompanyWorkItems } from "@/lib/db";
+import { listCompanyWorkItems, type CompanyWorkItem } from "@/lib/db";
 
 export default async function AdminPage() {
   if (!(await isAdminAuthenticated())) {
     redirect("/admin/login");
   }
 
-  const works = await listCompanyWorkItems();
+  let works: CompanyWorkItem[] = [];
+  let databaseError = false;
+
+  try {
+    works = await listCompanyWorkItems();
+  } catch {
+    databaseError = true;
+  }
 
   return (
     <main className="min-h-screen bg-[#090909] px-4 py-8 text-white sm:px-8">
@@ -34,7 +41,14 @@ export default async function AdminPage() {
           </div>
         </header>
 
-        {works.length ? (
+        {databaseError ? (
+          <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-8 text-red-100">
+            <h2 className="text-xl font-black uppercase">База данных не подключилась</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-red-100/75">
+              Админка открылась, но не смогла получить работы из Postgres. Проверь в Vercel переменную DATABASE_URI и сделай Redeploy проекта.
+            </p>
+          </div>
+        ) : works.length ? (
           <div className="grid gap-4">
             {works.map((work) => (
               <article className="grid gap-4 rounded-2xl border border-white/10 bg-[#151515] p-5 md:grid-cols-[1fr_auto]" key={work.id}>

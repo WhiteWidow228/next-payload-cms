@@ -1,5 +1,8 @@
-﻿import "../globals.css";
+import "../globals.css";
 import type { Metadata } from "next";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Админка Core Devs",

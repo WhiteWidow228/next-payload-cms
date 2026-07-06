@@ -7,6 +7,8 @@ import {
   getAdminCredentials,
 } from "@/lib/admin-auth";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const login = String(formData.get("login") || "").trim();
