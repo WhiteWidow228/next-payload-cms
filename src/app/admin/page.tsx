@@ -40,6 +40,9 @@ export default async function AdminPage() {
             <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin/categories">
               Категории
             </Link>
+            <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin/users">
+              Пользователи
+            </Link>
             <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/portfolio">
               Портфолио
             </Link>

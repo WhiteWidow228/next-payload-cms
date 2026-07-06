@@ -1,9 +1,19 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
+import { getAdminUserById, type AdminUser } from "@/lib/db";
+
 export const ADMIN_COOKIE_NAME = "core_devs_admin";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
-const SESSION_VERSION = 2;
+const SESSION_VERSION = 3;
+
+type AdminSessionPayload = {
+  sub?: string;
+  uid?: number;
+  login?: string;
+  exp?: number;
+  ver?: number;
+};
 
 function getSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET?.trim();
@@ -39,23 +49,11 @@ function verifySignature(value: string, signature: string) {
   const expectedBuffer = Buffer.from(expected);
   const signatureBuffer = Buffer.from(signature);
 
-  return (
-    expectedBuffer.length === signatureBuffer.length &&
-    timingSafeEqual(expectedBuffer, signatureBuffer)
-  );
-}
-
-export function getAdminCredentials() {
-  return {
-    login: process.env.ADMIN_LOGIN || "admin",
-    password: process.env.ADMIN_PASSWORD || "",
-  };
+  return expectedBuffer.length === signatureBuffer.length && timingSafeEqual(expectedBuffer, signatureBuffer);
 }
 
 export function isAdminAuthConfigured() {
-  const credentials = getAdminCredentials();
-
-  return Boolean(credentials.password && getSecret());
+  return Boolean(getSecret());
 }
 
 export function getAdminCookieOptions() {
@@ -68,9 +66,11 @@ export function getAdminCookieOptions() {
   };
 }
 
-export function createAdminToken() {
+export function createAdminToken(user: Pick<AdminUser, "id" | "login">) {
   const expiresAt = Date.now() + MAX_AGE_SECONDS * 1000;
-  const sessionPayload = Buffer.from(JSON.stringify({ sub: "admin", exp: expiresAt, ver: SESSION_VERSION })).toString("base64url");
+  const sessionPayload = Buffer.from(
+    JSON.stringify({ sub: "admin", uid: user.id, login: user.login, exp: expiresAt, ver: SESSION_VERSION }),
+  ).toString("base64url");
   const signature = sign(sessionPayload);
 
   if (!signature) {
@@ -80,37 +80,48 @@ export function createAdminToken() {
   return `${sessionPayload}.${signature}`;
 }
 
-export function isValidAdminToken(token?: string) {
+async function getSessionUserFromToken(token?: string) {
   if (!token) {
-    return false;
+    return null;
   }
 
   const [sessionPayload, signature] = token.split(".");
 
   if (!sessionPayload || !signature || !verifySignature(sessionPayload, signature)) {
-    return false;
+    return null;
   }
 
   try {
-    const session = JSON.parse(Buffer.from(sessionPayload, "base64url").toString("utf8")) as {
-      exp?: number;
-      sub?: string;
-      ver?: number;
-    };
+    const session = JSON.parse(Buffer.from(sessionPayload, "base64url").toString("utf8")) as AdminSessionPayload;
 
-    return (
-      session.sub === "admin" &&
-      session.ver === SESSION_VERSION &&
-      typeof session.exp === "number" &&
-      session.exp > Date.now()
-    );
+    if (
+      session.sub !== "admin" ||
+      session.ver !== SESSION_VERSION ||
+      typeof session.uid !== "number" ||
+      typeof session.exp !== "number" ||
+      session.exp <= Date.now()
+    ) {
+      return null;
+    }
+
+    const user = await getAdminUserById(session.uid);
+
+    if (!user?.isActive) {
+      return null;
+    }
+
+    return user;
   } catch {
-    return false;
+    return null;
   }
 }
 
-export async function isAdminAuthenticated() {
+export async function getCurrentAdminUser() {
   const cookieStore = await cookies();
 
-  return isValidAdminToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+  return getSessionUserFromToken(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+}
+
+export async function isAdminAuthenticated() {
+  return Boolean(await getCurrentAdminUser());
 }

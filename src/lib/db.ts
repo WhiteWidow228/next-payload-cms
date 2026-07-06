@@ -1,5 +1,7 @@
 import { Pool, type PoolConfig } from "pg";
 
+import { hashPassword, verifyPassword } from "@/lib/passwords";
+
 type TeamMember = {
   name: string;
   avatar: string;
@@ -33,6 +35,26 @@ export type CompanyWorkItem = {
 
 export type CompanyWorkInput = Omit<CompanyWorkItem, "id">;
 
+export type AdminUser = {
+  id: number;
+  login: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt: string | null;
+};
+
+type AdminUserRecord = AdminUser & {
+  passwordHash: string;
+};
+
+export type AdminUserInput = {
+  login: string;
+  name: string;
+  passwordHash?: string;
+  isActive: boolean;
+};
 const DATABASE_ENV_KEYS = [
   "DATABASE_URI",
   "DATABASE_URL",
@@ -206,6 +228,43 @@ export function getDatabaseErrorMessage(error: unknown) {
   return `Postgres returned an error: ${message}`;
 }
 
+async function ensureAdminUsersTable() {
+  await getDb().query(`
+    CREATE TABLE IF NOT EXISTS admin_users (
+      id SERIAL PRIMARY KEY,
+      login TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL DEFAULT '',
+      password_hash TEXT NOT NULL,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      last_login_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await getDb().query("CREATE INDEX IF NOT EXISTS admin_users_active_idx ON admin_users (is_active)");
+
+  const countResult = await getDb().query("SELECT COUNT(*)::int AS count FROM admin_users");
+  const usersCount = Number(countResult.rows[0]?.count || 0);
+  const initialPassword = process.env.ADMIN_PASSWORD?.trim();
+
+  if (usersCount > 0 || !initialPassword) {
+    return;
+  }
+
+  const login = (process.env.ADMIN_LOGIN || "admin").trim().toLowerCase();
+  const name = (process.env.ADMIN_NAME || "Администратор").trim();
+  const passwordHash = await hashPassword(initialPassword);
+
+  await getDb().query(
+    `
+      INSERT INTO admin_users (login, name, password_hash, is_active)
+      VALUES ($1, $2, $3, TRUE)
+      ON CONFLICT (login) DO NOTHING
+    `,
+    [login, name, passwordHash],
+  );
+}
 async function ensureProjectCategoriesTable() {
   await getDb().query(`
     CREATE TABLE IF NOT EXISTS project_categories (
@@ -311,6 +370,149 @@ function mapCompanyWork(row: Record<string, unknown>): CompanyWorkItem {
   };
 }
 
+function mapAdminUser(row: Record<string, unknown>): AdminUser {
+  return {
+    id: Number(row.id),
+    login: String(row.login || ""),
+    name: String(row.name || ""),
+    isActive: Boolean(row.isActive ?? row.is_active),
+    createdAt: String(row.createdAt || row.created_at || ""),
+    updatedAt: String(row.updatedAt || row.updated_at || ""),
+    lastLoginAt: row.lastLoginAt || row.last_login_at ? String(row.lastLoginAt || row.last_login_at) : null,
+  };
+}
+
+function mapAdminUserRecord(row: Record<string, unknown>): AdminUserRecord {
+  return {
+    ...mapAdminUser(row),
+    passwordHash: String(row.passwordHash || row.password_hash || ""),
+  };
+}
+
+const adminUserSelect = `
+  SELECT
+    id,
+    login,
+    name,
+    is_active AS "isActive",
+    password_hash AS "passwordHash",
+    created_at AS "createdAt",
+    updated_at AS "updatedAt",
+    last_login_at AS "lastLoginAt"
+  FROM admin_users
+`;
+
+export async function listAdminUsers() {
+  await ensureAdminUsersTable();
+
+  const result = await getDb().query(`${adminUserSelect} ORDER BY id ASC`);
+
+  return result.rows.map(mapAdminUser);
+}
+
+export async function getAdminUserById(id: number) {
+  await ensureAdminUsersTable();
+
+  const result = await getDb().query(`${adminUserSelect} WHERE id = $1`, [id]);
+
+  return result.rows[0] ? mapAdminUserRecord(result.rows[0]) : null;
+}
+
+export async function getAdminUserByLogin(login: string) {
+  await ensureAdminUsersTable();
+
+  const result = await getDb().query(`${adminUserSelect} WHERE LOWER(login) = LOWER($1) AND is_active = TRUE`, [login]);
+
+  return result.rows[0] ? mapAdminUserRecord(result.rows[0]) : null;
+}
+
+export async function authenticateAdminUser(login: string, password: string) {
+  const user = await getAdminUserByLogin(login);
+
+  if (!user || !(await verifyPassword(password, user.passwordHash))) {
+    return null;
+  }
+
+  await getDb().query("UPDATE admin_users SET last_login_at = NOW() WHERE id = $1", [user.id]);
+
+  return mapAdminUser(user);
+}
+
+export async function createAdminUser(input: AdminUserInput) {
+  await ensureAdminUsersTable();
+
+  if (!input.passwordHash) {
+    throw new Error("Password hash is required for a new admin user.");
+  }
+
+  await getDb().query(
+    `
+      INSERT INTO admin_users (login, name, password_hash, is_active)
+      VALUES ($1, $2, $3, $4)
+    `,
+    [input.login, input.name, input.passwordHash, input.isActive],
+  );
+}
+
+export async function updateAdminUser(id: number, input: AdminUserInput) {
+  await ensureAdminUsersTable();
+
+  const current = await getDb().query("SELECT is_active FROM admin_users WHERE id = $1", [id]);
+
+  if (!current.rows[0]) {
+    return;
+  }
+
+  if (current.rows[0].is_active && !input.isActive) {
+    const activeCount = await getDb().query("SELECT COUNT(*)::int AS count FROM admin_users WHERE is_active = TRUE");
+
+    if (Number(activeCount.rows[0]?.count || 0) <= 1) {
+      throw new Error("Cannot deactivate the last active admin user.");
+    }
+  }
+
+  if (input.passwordHash) {
+    await getDb().query(
+      `
+        UPDATE admin_users
+        SET login = $2, name = $3, password_hash = $4, is_active = $5, updated_at = NOW()
+        WHERE id = $1
+      `,
+      [id, input.login, input.name, input.passwordHash, input.isActive],
+    );
+
+    return;
+  }
+
+  await getDb().query(
+    `
+      UPDATE admin_users
+      SET login = $2, name = $3, is_active = $4, updated_at = NOW()
+      WHERE id = $1
+    `,
+    [id, input.login, input.name, input.isActive],
+  );
+}
+
+export async function deleteAdminUser(id: number) {
+  await ensureAdminUsersTable();
+
+  const current = await getDb().query("SELECT is_active FROM admin_users WHERE id = $1", [id]);
+
+  if (!current.rows[0]) {
+    return;
+  }
+
+  if (current.rows[0].is_active) {
+    const activeCount = await getDb().query("SELECT COUNT(*)::int AS count FROM admin_users WHERE is_active = TRUE");
+
+    if (Number(activeCount.rows[0]?.count || 0) <= 1) {
+      throw new Error("Cannot delete the last active admin user.");
+    }
+  }
+
+  await getDb().query("DELETE FROM admin_users WHERE id = $1", [id]);
+}
 export async function listProjectCategories() {
   await ensureProjectCategoriesTable();
 

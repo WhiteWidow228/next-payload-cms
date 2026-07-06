@@ -3,14 +3,19 @@
 import { redirect } from "next/navigation";
 
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { hashPassword } from "@/lib/passwords";
 import {
+  createAdminUser,
   createCompanyWorkItem,
   createProjectCategory,
+  deleteAdminUser,
   deleteCompanyWorkItem,
   deleteProjectCategory,
   listProjectCategories,
+  updateAdminUser,
   updateCompanyWorkItem,
   updateProjectCategory,
+  type AdminUserInput,
   type CompanyWorkInput,
   type ProjectCategoryInput,
 } from "@/lib/db";
@@ -114,6 +119,20 @@ function parseCategoryInput(formData: FormData): ProjectCategoryInput {
   };
 }
 
+
+async function parseAdminUserInput(formData: FormData): Promise<{ input: AdminUserInput; password: string }> {
+  const password = String(formData.get("password") || "");
+
+  return {
+    input: {
+      login: String(formData.get("login") || "").trim().toLowerCase(),
+      name: String(formData.get("name") || "").trim(),
+      isActive: formData.get("isActive") === "on",
+      passwordHash: password ? await hashPassword(password) : undefined,
+    },
+    password,
+  };
+}
 async function requireAdmin() {
   if (!(await isAdminAuthenticated())) {
     redirect("/admin/login");
@@ -188,4 +207,42 @@ export async function deleteCategoryAction(formData: FormData) {
   }
 
   redirect("/admin/categories");
+}
+export async function saveAdminUserAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id") || 0);
+  const { input, password } = await parseAdminUserInput(formData);
+
+  if (!input.login || (!id && !password) || (password && password.length < 6)) {
+    redirect("/admin/users?error=required");
+  }
+
+  try {
+    if (id > 0) {
+      await updateAdminUser(id, input);
+    } else {
+      await createAdminUser(input);
+    }
+  } catch {
+    redirect("/admin/users?error=save");
+  }
+
+  redirect("/admin/users");
+}
+
+export async function deleteAdminUserAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id") || 0);
+
+  try {
+    if (id > 0) {
+      await deleteAdminUser(id);
+    }
+  } catch {
+    redirect("/admin/users?error=save");
+  }
+
+  redirect("/admin/users");
 }
