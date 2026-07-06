@@ -1,8 +1,8 @@
-﻿import { notFound, redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { WorkForm } from "../../work-form";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { getCompanyWorkItem } from "@/lib/db";
+import { getCompanyWorkItem, listProjectCategories } from "@/lib/db";
 
 export default async function EditWorkPage({
   params,
@@ -16,13 +16,15 @@ export default async function EditWorkPage({
   }
 
   const { id } = await params;
-  const work = await getCompanyWorkItem(Number(id));
+  const [work, categories, query] = await Promise.all([
+    getCompanyWorkItem(Number(id)),
+    listProjectCategories(),
+    searchParams,
+  ]);
 
   if (!work) {
     notFound();
   }
 
-  const query = await searchParams;
-
-  return <WorkForm error={query.error} work={work} />;
+  return <WorkForm categories={categories} error={query.error} work={work} />;
 }

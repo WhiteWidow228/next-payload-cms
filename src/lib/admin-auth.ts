@@ -6,7 +6,17 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 const SESSION_VERSION = 2;
 
 function getSecret() {
-  return process.env.ADMIN_SESSION_SECRET || "local-dev-secret-change-me";
+  const secret = process.env.ADMIN_SESSION_SECRET;
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    return "local-dev-session-secret";
+  }
+
+  throw new Error("ADMIN_SESSION_SECRET is not configured.");
 }
 
 function sign(value: string) {
@@ -27,7 +37,7 @@ function verifySignature(value: string, signature: string) {
 export function getAdminCredentials() {
   return {
     login: process.env.ADMIN_LOGIN || "admin",
-    password: process.env.ADMIN_PASSWORD || "123321",
+    password: process.env.ADMIN_PASSWORD || "",
   };
 }
 

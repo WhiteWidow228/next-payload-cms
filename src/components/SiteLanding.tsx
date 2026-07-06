@@ -9,6 +9,7 @@ import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
 type WorkCard = {
   id: string | number;
   title: string;
+  slug: string;
   summary: string;
   category: string;
   timeTaken: string;
@@ -64,6 +65,7 @@ const services = [
 const fallbackWorks: WorkCard[] = [
   {
     id: "zenith",
+    slug: "zenith-fitness-app",
     title: "Фитнес-приложение Zenith",
     summary:
       "Мобильное приложение для фитнес-студии с программами тренировок, питанием и личным кабинетом клиента.",
@@ -80,6 +82,7 @@ const fallbackWorks: WorkCard[] = [
   },
   {
     id: "aura",
+    slug: "a-aura-ecommerce",
     title: "Интернет-магазин A-Aura",
     summary:
       "Редизайн интернет-магазина с новой визуальной системой, удобным каталогом и понятной покупкой.",
@@ -169,6 +172,7 @@ async function getCompanyWorks() {
       return {
         id: item.id,
         title: item.title,
+        slug: item.slug || fallback.slug,
         summary: item.summary,
         category: item.category || fallback.category,
         timeTaken: item.timeTaken || fallback.timeTaken,
@@ -324,13 +328,12 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
         <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="работы-компании">
           <div className="flex items-center justify-between border-b border-white/5 px-8 py-8 sm:px-10">
             <h2 className="text-3xl font-black uppercase tracking-[-0.02em] text-white sm:text-4xl">Работы компании</h2>
-            <a
+            <Link
               className="rounded-full bg-white/[0.03] px-5 py-3 text-[11px] font-black uppercase text-white/54 transition hover:text-cyan-300"
-              data-estimate-trigger
-              href="#"
+              href="/portfolio"
             >
               ↗ Все работы
-            </a>
+            </Link>
           </div>
           <div className="grid gap-2 bg-white/[0.03] p-2">
             {works.map((work, index) => (
@@ -524,13 +527,12 @@ function WorkProjectCard({ work, index }: { work: WorkCard; index: number }) {
             <span className="grid size-10 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/10 text-cyan-300">✦</span>
             <h3 className="text-base font-black uppercase text-white">{work.title}</h3>
           </div>
-          <a
+          <Link
             className="text-xs font-black uppercase text-white/55 transition hover:text-cyan-300"
-            data-estimate-trigger
-            href="#"
+            href={`/portfolio/${work.slug}`}
           >
             ↗ Детали
-          </a>
+          </Link>
         </div>
         <div className="space-y-5 text-sm text-white/48">
           <p>Категория - <span className="text-white/75">{work.category}</span></p>

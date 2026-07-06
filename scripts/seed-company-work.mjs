@@ -28,7 +28,12 @@ function loadLocalEnv() {
 
 loadLocalEnv();
 
-const connectionString = process.env.DATABASE_URI || "postgres://postgres:123321@localhost:5432/core_devs_cms";
+const databaseEnvKeys = ["DATABASE_URI", "DATABASE_URL", "POSTGRES_URL", "POSTGRES_PRISMA_URL", "POSTGRES_URL_NON_POOLING"];
+const connectionString = databaseEnvKeys.map((key) => process.env[key]).find(Boolean);
+
+if (!connectionString) {
+  throw new Error(`Postgres connection string is not configured. Add one of: ${databaseEnvKeys.join(", ")}`);
+}
 
 const works = [
   {

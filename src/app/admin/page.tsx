@@ -31,11 +31,17 @@ export default async function AdminPage() {
         <header className="mb-8 flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#171717] p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Core Devs Admin</p>
-            <h1 className="mt-2 text-3xl font-black uppercase">Работы компании</h1>
+            <h1 className="mt-2 text-3xl font-black uppercase">Проекты портфолио</h1>
           </div>
           <div className="flex flex-wrap gap-3">
             <Link className="rounded-lg bg-[#13c9e8] px-5 py-3 text-xs font-black uppercase text-[#071012]" href="/admin/work/new">
-              Добавить работу
+              Добавить проект
+            </Link>
+            <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin/categories">
+              Категории
+            </Link>
+            <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/portfolio">
+              Портфолио
             </Link>
             <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/">
               На сайт
@@ -65,14 +71,18 @@ export default async function AdminPage() {
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="text-xl font-black uppercase">{work.title}</h2>
-                    <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold text-cyan-300">#{work.sortOrder}</span>
+                    <span className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs font-bold text-cyan-300">/{work.slug}</span>
+                    <span className="rounded-full bg-white/5 px-3 py-1 text-xs font-bold text-white/50">{work.category}</span>
                   </div>
                   <p className="mt-3 max-w-3xl text-sm leading-6 text-white/55">{work.summary}</p>
-                  <p className="mt-3 text-sm text-white/40">{work.category} · {work.timeTaken}</p>
+                  <p className="mt-3 text-sm text-white/40">{work.timeTaken} · порядок #{work.sortOrder}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <Link className="rounded-lg bg-white px-4 py-3 text-xs font-black uppercase text-[#071012]" href={`/admin/work/${work.id}`}>
                     Редактировать
+                  </Link>
+                  <Link className="rounded-lg border border-cyan-300/30 px-4 py-3 text-xs font-black uppercase text-cyan-300" href={`/portfolio/${work.slug}`}>
+                    Открыть
                   </Link>
                 </div>
               </article>
@@ -80,7 +90,7 @@ export default async function AdminPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-white/10 bg-[#151515] p-8 text-center text-white/55">
-            Работ пока нет. Добавь первый кейс, и он появится на главной странице.
+            Проектов пока нет. Добавь первый кейс, и он появится на странице портфолио.
           </div>
         )}
       </div>

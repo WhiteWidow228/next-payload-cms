@@ -1,12 +1,14 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 import { deleteWorkAction, saveWorkAction } from "./actions";
-import type { CompanyWorkItem } from "@/lib/db";
+import type { CompanyWorkItem, ProjectCategory } from "@/lib/db";
 
 const emptyWork: Partial<CompanyWorkItem> = {
+  slug: "",
   title: "",
   summary: "",
-  category: "Дизайн и разработка сайта",
+  category: "Сайты",
+  categorySlug: "sites",
   timeTaken: "3 месяца",
   image: "/assets/work-aura-clean.jpg",
   imageAlt: "Превью проекта",
@@ -20,10 +22,19 @@ const emptyWork: Partial<CompanyWorkItem> = {
   sortOrder: 0,
 };
 
-export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkItem | null }) {
+export function WorkForm({
+  categories,
+  error,
+  work,
+}: {
+  categories: ProjectCategory[];
+  error?: string;
+  work?: CompanyWorkItem | null;
+}) {
   const item = work || emptyWork;
   const technologies = item.technologies?.join("\n") || "";
   const teamMembers = item.teamMembers?.map((member) => member.name).join("\n") || "";
+  const selectedCategory = item.categorySlug || categories[0]?.slug || "sites";
 
   return (
     <main className="min-h-screen bg-[#090909] px-4 py-8 text-white sm:px-8">
@@ -31,26 +42,35 @@ export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkIt
         <header className="mb-8 flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#171717] p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Core Devs Admin</p>
-            <h1 className="mt-2 text-3xl font-black uppercase">{work ? "Редактировать работу" : "Новая работа"}</h1>
+            <h1 className="mt-2 text-3xl font-black uppercase">{work ? "Редактировать проект" : "Новый проект"}</h1>
           </div>
-          <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin">
-            Назад
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin/categories">
+              Категории
+            </Link>
+            <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin">
+              Назад
+            </Link>
+          </div>
         </header>
 
-        {error ? <p className="mb-5 rounded-xl bg-red-500/10 p-4 text-sm text-red-200">Заполни название и описание проекта.</p> : null}
+        {error ? (
+          <p className="mb-5 rounded-xl bg-red-500/10 p-4 text-sm text-red-200">
+            {error === "save" ? "Проверь поля проекта. Возможно, такой slug уже занят." : "Заполни название и описание проекта."}
+          </p>
+        ) : null}
 
         <form action={saveWorkAction} className="grid gap-5 rounded-2xl border border-white/10 bg-[#151515] p-6">
           {work ? <input name="id" type="hidden" value={work.id} /> : null}
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Название проекта" name="title" required value={item.title} />
-            <Field label="Категория" name="category" value={item.category} />
+            <Field label="Slug страницы" name="slug" placeholder="my-project" value={item.slug} />
+          </div>
+          <div className="grid gap-5 md:grid-cols-2">
+            <CategorySelect categories={categories} value={selectedCategory} />
+            <Field label="Срок" name="timeTaken" value={item.timeTaken} />
           </div>
           <TextArea label="Описание" name="summary" required rows={5} value={item.summary} />
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Срок" name="timeTaken" value={item.timeTaken} />
-            <Field label="Порядок" name="sortOrder" type="number" value={String(item.sortOrder ?? 0)} />
-          </div>
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Путь к изображению" name="image" value={item.image} />
             <Field label="Alt изображения" name="imageAlt" value={item.imageAlt} />
@@ -59,7 +79,10 @@ export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkIt
             <TextArea label="Технологии, каждая с новой строки" name="technologies" rows={6} value={technologies} />
             <TextArea label="Команда, каждый участник с новой строки" name="teamMembers" rows={6} value={teamMembers} />
           </div>
-          <Field label="Текст кнопки" name="ctaLabel" value={item.ctaLabel} />
+          <div className="grid gap-5 md:grid-cols-2">
+            <Field label="Текст кнопки" name="ctaLabel" value={item.ctaLabel} />
+            <Field label="Порядок" name="sortOrder" type="number" value={String(item.sortOrder ?? 0)} />
+          </div>
           <div className="flex flex-wrap gap-3 pt-2">
             <button className="rounded-lg bg-[#13c9e8] px-6 py-3 text-xs font-black uppercase text-[#071012] transition hover:bg-white" type="submit">
               Сохранить
@@ -67,6 +90,11 @@ export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkIt
             <Link className="rounded-lg border border-white/10 px-6 py-3 text-xs font-black uppercase text-white/70" href="/admin">
               Отмена
             </Link>
+            {work?.slug ? (
+              <Link className="rounded-lg border border-cyan-300/30 px-6 py-3 text-xs font-black uppercase text-cyan-300" href={`/portfolio/${work.slug}`}>
+                Открыть страницу
+              </Link>
+            ) : null}
           </div>
         </form>
 
@@ -75,7 +103,7 @@ export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkIt
             <input name="id" type="hidden" value={work.id} />
             <p className="text-sm text-red-100/70">Удаление нельзя отменить.</p>
             <button className="mt-4 rounded-lg bg-red-500 px-6 py-3 text-xs font-black uppercase text-white" type="submit">
-              Удалить работу
+              Удалить проект
             </button>
           </form>
         ) : null}
@@ -84,7 +112,40 @@ export function WorkForm({ error, work }: { error?: string; work?: CompanyWorkIt
   );
 }
 
-function Field({ label, name, required, type = "text", value }: { label: string; name: string; required?: boolean; type?: string; value?: string | number }) {
+function CategorySelect({ categories, value }: { categories: ProjectCategory[]; value: string }) {
+  return (
+    <label className="block text-sm font-bold text-white/70">
+      Категория
+      <select
+        className="mt-2 h-12 w-full rounded-lg border border-white/10 bg-[#0f0f0f] px-4 text-white outline-none focus:border-cyan-300"
+        defaultValue={value}
+        name="categorySlug"
+      >
+        {categories.map((category) => (
+          <option className="bg-[#0f0f0f]" key={category.slug} value={category.slug}>
+            {category.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function Field({
+  label,
+  name,
+  placeholder,
+  required,
+  type = "text",
+  value,
+}: {
+  label: string;
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  type?: string;
+  value?: string | number;
+}) {
   return (
     <label className="block text-sm font-bold text-white/70">
       {label}
@@ -92,6 +153,7 @@ function Field({ label, name, required, type = "text", value }: { label: string;
         className="mt-2 h-12 w-full rounded-lg border border-white/10 bg-[#0f0f0f] px-4 text-white outline-none focus:border-cyan-300"
         defaultValue={value || ""}
         name={name}
+        placeholder={placeholder}
         required={required}
         type={type}
       />

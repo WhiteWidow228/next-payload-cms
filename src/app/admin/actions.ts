@@ -5,10 +5,67 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
 import {
   createCompanyWorkItem,
+  createProjectCategory,
   deleteCompanyWorkItem,
+  deleteProjectCategory,
+  listProjectCategories,
   updateCompanyWorkItem,
+  updateProjectCategory,
   type CompanyWorkInput,
+  type ProjectCategoryInput,
 } from "@/lib/db";
+
+const DEFAULT_CTA_LABEL = "\u0420\u0430\u0441\u0441\u0447\u0438\u0442\u0430\u0442\u044c \u0441\u043c\u0435\u0442\u0443";
+
+const translitMap: Record<string, string> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "e",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "h",
+  ц: "c",
+  ч: "ch",
+  ш: "sh",
+  щ: "sch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya",
+};
+
+function slugify(value: string, fallback = "item") {
+  const slug = value
+    .trim()
+    .toLowerCase()
+    .split("")
+    .map((char) => translitMap[char] ?? char)
+    .join("")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+
+  return slug || fallback;
+}
 
 function parseList(value: FormDataEntryValue | null) {
   return String(value || "")
@@ -24,17 +81,35 @@ function parseTeamMembers(value: FormDataEntryValue | null) {
   }));
 }
 
-function parseWorkInput(formData: FormData): CompanyWorkInput {
+async function parseWorkInput(formData: FormData): Promise<CompanyWorkInput> {
+  const title = String(formData.get("title") || "").trim();
+  const requestedCategorySlug = slugify(String(formData.get("categorySlug") || "sites"), "sites");
+  const categories = await listProjectCategories();
+  const category = categories.find((item) => item.slug === requestedCategorySlug) || categories[0];
+
   return {
-    title: String(formData.get("title") || "").trim(),
+    slug: slugify(String(formData.get("slug") || title), `work-${Date.now()}`),
+    title,
     summary: String(formData.get("summary") || "").trim(),
-    category: String(formData.get("category") || "").trim(),
+    category: category?.name || String(formData.get("category") || "").trim(),
+    categorySlug: category?.slug || requestedCategorySlug,
     timeTaken: String(formData.get("timeTaken") || "").trim(),
     image: String(formData.get("image") || "").trim(),
     imageAlt: String(formData.get("imageAlt") || "").trim(),
     technologies: parseList(formData.get("technologies")),
     teamMembers: parseTeamMembers(formData.get("teamMembers")),
-    ctaLabel: String(formData.get("ctaLabel") || "Рассчитать смету").trim(),
+    ctaLabel: String(formData.get("ctaLabel") || DEFAULT_CTA_LABEL).trim(),
+    sortOrder: Number(formData.get("sortOrder") || 0),
+  };
+}
+
+function parseCategoryInput(formData: FormData): ProjectCategoryInput {
+  const name = String(formData.get("name") || "").trim();
+
+  return {
+    name,
+    slug: slugify(String(formData.get("slug") || name), "category"),
+    description: String(formData.get("description") || "").trim(),
     sortOrder: Number(formData.get("sortOrder") || 0),
   };
 }
@@ -49,16 +124,20 @@ export async function saveWorkAction(formData: FormData) {
   await requireAdmin();
 
   const id = Number(formData.get("id") || 0);
-  const input = parseWorkInput(formData);
+  const input = await parseWorkInput(formData);
 
   if (!input.title || !input.summary) {
     redirect(id ? `/admin/work/${id}?error=required` : "/admin/work/new?error=required");
   }
 
-  if (id > 0) {
-    await updateCompanyWorkItem(id, input);
-  } else {
-    await createCompanyWorkItem(input);
+  try {
+    if (id > 0) {
+      await updateCompanyWorkItem(id, input);
+    } else {
+      await createCompanyWorkItem(input);
+    }
+  } catch {
+    redirect(id ? `/admin/work/${id}?error=save` : "/admin/work/new?error=save");
   }
 
   redirect("/admin");
@@ -74,4 +153,39 @@ export async function deleteWorkAction(formData: FormData) {
   }
 
   redirect("/admin");
+}
+
+export async function saveCategoryAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id") || 0);
+  const input = parseCategoryInput(formData);
+
+  if (!input.name || !input.slug) {
+    redirect("/admin/categories?error=required");
+  }
+
+  try {
+    if (id > 0) {
+      await updateProjectCategory(id, input);
+    } else {
+      await createProjectCategory(input);
+    }
+  } catch {
+    redirect("/admin/categories?error=save");
+  }
+
+  redirect("/admin/categories");
+}
+
+export async function deleteCategoryAction(formData: FormData) {
+  await requireAdmin();
+
+  const id = Number(formData.get("id") || 0);
+
+  if (id > 0) {
+    await deleteProjectCategory(id);
+  }
+
+  redirect("/admin/categories");
 }

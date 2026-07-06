@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const password = String(formData.get("password") || "");
   const credentials = getAdminCredentials();
 
-  if (login !== credentials.login || password !== credentials.password) {
+  if (!credentials.password || login !== credentials.login || password !== credentials.password) {
     return NextResponse.redirect(new URL("/admin/login?error=1", request.url), { status: 303 });
   }
 
