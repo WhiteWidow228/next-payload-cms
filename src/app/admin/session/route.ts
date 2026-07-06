@@ -5,6 +5,7 @@ import {
   createAdminToken,
   getAdminCookieOptions,
   getAdminCredentials,
+  isAdminAuthConfigured,
 } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
@@ -15,7 +16,11 @@ export async function POST(request: NextRequest) {
   const password = String(formData.get("password") || "");
   const credentials = getAdminCredentials();
 
-  if (!credentials.password || login !== credentials.login || password !== credentials.password) {
+  if (!isAdminAuthConfigured()) {
+    return NextResponse.redirect(new URL("/admin/login?error=setup", request.url), { status: 303 });
+  }
+
+  if (login !== credentials.login || password !== credentials.password) {
     return NextResponse.redirect(new URL("/admin/login?error=1", request.url), { status: 303 });
   }
 

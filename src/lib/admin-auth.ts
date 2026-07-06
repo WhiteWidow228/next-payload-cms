@@ -6,7 +6,7 @@ const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 const SESSION_VERSION = 2;
 
 function getSecret() {
-  const secret = process.env.ADMIN_SESSION_SECRET;
+  const secret = process.env.ADMIN_SESSION_SECRET?.trim();
 
   if (secret) {
     return secret;
@@ -16,15 +16,26 @@ function getSecret() {
     return "local-dev-session-secret";
   }
 
-  throw new Error("ADMIN_SESSION_SECRET is not configured.");
+  return "";
 }
 
 function sign(value: string) {
-  return createHmac("sha256", getSecret()).update(value).digest("base64url");
+  const secret = getSecret();
+
+  if (!secret) {
+    return "";
+  }
+
+  return createHmac("sha256", secret).update(value).digest("base64url");
 }
 
 function verifySignature(value: string, signature: string) {
   const expected = sign(value);
+
+  if (!expected) {
+    return false;
+  }
+
   const expectedBuffer = Buffer.from(expected);
   const signatureBuffer = Buffer.from(signature);
 
@@ -41,6 +52,12 @@ export function getAdminCredentials() {
   };
 }
 
+export function isAdminAuthConfigured() {
+  const credentials = getAdminCredentials();
+
+  return Boolean(credentials.password && getSecret());
+}
+
 export function getAdminCookieOptions() {
   return {
     httpOnly: true,
@@ -54,8 +71,13 @@ export function getAdminCookieOptions() {
 export function createAdminToken() {
   const expiresAt = Date.now() + MAX_AGE_SECONDS * 1000;
   const sessionPayload = Buffer.from(JSON.stringify({ sub: "admin", exp: expiresAt, ver: SESSION_VERSION })).toString("base64url");
+  const signature = sign(sessionPayload);
 
-  return `${sessionPayload}.${sign(sessionPayload)}`;
+  if (!signature) {
+    throw new Error("ADMIN_SESSION_SECRET is not configured.");
+  }
+
+  return `${sessionPayload}.${signature}`;
 }
 
 export function isValidAdminToken(token?: string) {

@@ -8,13 +8,19 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   }
 
   const params = await searchParams;
+  const errorMessage =
+    params.error === "setup"
+      ? "Админка не настроена на Vercel. Добавь ADMIN_PASSWORD и ADMIN_SESSION_SECRET в Environment Variables."
+      : params.error
+        ? "Неверный логин или пароль."
+        : "";
 
   return (
     <main className="grid min-h-screen place-items-center bg-[#090909] px-4 text-white">
       <form action="/admin/session" method="post" className="w-full max-w-md rounded-2xl border border-white/10 bg-[#171717] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Core Devs Admin</p>
         <h1 className="mt-3 text-3xl font-black uppercase">Вход</h1>
-        {params.error ? <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-200">Неверный логин или пароль.</p> : null}
+        {errorMessage ? <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-200">{errorMessage}</p> : null}
         <label className="mt-8 block text-sm font-bold text-white/70">
           Логин
           <input className="mt-2 h-12 w-full rounded-lg border border-white/10 bg-[#0f0f0f] px-4 text-white outline-none focus:border-cyan-300" name="login" autoComplete="username" />
