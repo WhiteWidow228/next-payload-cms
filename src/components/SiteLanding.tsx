@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { AnimatedStatValue } from "@/components/AnimatedStatValue";
+import { FaqAccordion } from "@/components/FaqAccordion";
 
 import { listCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
@@ -221,15 +222,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 420px"
-                src="/assets/coredevs-hero.png"
+                src="/assets/Image.jpg"
               />
-              <a
-                className="pulse-ring absolute right-5 top-5 flex size-16 items-center justify-center rounded-full bg-[#13c9e8] text-3xl font-black text-[#071012] shadow-[0_0_0_10px_rgba(19,201,232,0.08)] transition duration-300 hover:rotate-45"
-                data-estimate-trigger
-                href="#"
-              >
-                ↗
-              </a>
             </div>
             <div className="p-7">
               <h2 className="text-lg font-black uppercase">Core Devs</h2>
@@ -343,22 +337,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
         <section className="mt-20 grid gap-2 lg:grid-cols-[1.55fr_1fr]" id="faq">
           <div className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]">
             <SectionTitle title="Часто задаваемые вопросы" />
-            <div className="grid gap-2 bg-white/[0.03] p-2">
-              {faqs.map((item, index) => (
-                <details
-                  className="group animate-fade-up rounded-[12px] border border-white/5 bg-[#171717] p-7 open:border-cyan-300/25"
-                  key={item.question}
-                  open={index === 0}
-                  style={{ animationDelay: `${index * 70}ms` }}
-                >
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-black text-white">
-                    {item.question}
-                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white/[0.04] text-cyan-300 transition group-open:rotate-45">+</span>
-                  </summary>
-                  <p className="mt-5 max-w-3xl text-sm leading-6 text-white/50">{item.answer}</p>
-                </details>
-              ))}
-            </div>
+            <FaqAccordion items={faqs} />
+
           </div>
           <aside className="animate-fade-up rounded-[18px] border border-white/5 bg-[#171717] p-8 lg:mt-[92px]">
             <h3 className="text-2xl font-black uppercase leading-tight text-white">Готовы вывести ваш бизнес на новый уровень?</h3>

@@ -4,7 +4,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-[1380px] overflow-hidden">
         <div className="flex w-[200%] gap-4 border-y border-white/5 py-3 text-[11px] font-black uppercase text-white/32 animate-marquee">
           {Array.from({ length: 16 }).map((_, index) => (
-            <span key={index}>Следите за нами в соцсетях <span className="mx-3 text-[#13c9e8]">*</span></span>
+            <span key={index}>CORE DEVS<span className="mx-3 text-[#13c9e8]">*</span></span>
           ))}
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-[0.7fr_2fr]">
