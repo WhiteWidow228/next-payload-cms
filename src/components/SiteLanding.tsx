@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { AnimatedStatValue } from "@/components/AnimatedStatValue";
+
 import { listCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
 
@@ -27,25 +29,25 @@ const stats = [
 
 const services = [
   {
-    icon: "D",
+    iconSrc: "/assets/icon-web-design.svg",
     title: "Дизайн сайтов",
     text: "Профессиональный дизайн в Figma. Современный, адаптивный и ориентированный на конверсию.",
     price: "от 15 000 ₽",
   },
   {
-    icon: "B",
+    iconSrc: "/assets/icon-telegram-bot.svg",
     title: "Telegram боты",
     text: "Функциональные боты для продаж, поддержки клиентов, автоматизации и управления бизнесом.",
     price: "от 10 000 ₽",
   },
   {
-    icon: "W",
+    iconSrc: "/assets/icon-web-dev.svg",
     title: "Разработка сайтов",
     text: "Разработка сайтов на WordPress, Tilda и Next.js, от лендингов до крупных интернет-магазинов.",
     price: "от 20 000 ₽",
   },
   {
-    icon: "R",
+    iconSrc: "/assets/icon-react.svg",
     title: "React / Веб-приложения",
     text: "Современные веб-приложения, личные кабинеты, CRM-системы и сложные интерфейсные сервисы.",
     price: "от 60 000 ₽",
@@ -219,7 +221,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
                 fill
                 priority
                 sizes="(max-width: 1024px) 100vw, 420px"
-                src="/assets/hero-mountain.jpg"
+                src="/assets/coredevs-hero.png"
               />
               <a
                 className="pulse-ring absolute right-5 top-5 flex size-16 items-center justify-center rounded-full bg-[#13c9e8] text-3xl font-black text-[#071012] shadow-[0_0_0_10px_rgba(19,201,232,0.08)] transition duration-300 hover:rotate-45"
@@ -244,7 +246,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
               style={{ animationDelay: `${120 + index * 70}ms` }}
             >
               <p className="text-[11px] font-black uppercase text-white/42">{stat.label}</p>
-              <p className="mt-1 text-4xl font-black text-[#13c9e8]">{stat.value}</p>
+              <AnimatedStatValue className="mt-1 block text-4xl font-black text-[#13c9e8]" value={stat.value} />
             </div>
           ))}
           <a
@@ -269,8 +271,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <span className="grid size-10 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/10 text-sm font-black text-[#13c9e8] shadow-[0_0_24px_rgba(19,201,232,0.12)]">
-                      {service.icon}
+                    <span className="grid size-14 shrink-0 place-items-center rounded-[10px] border border-white/10 bg-[#1f1f1f] shadow-[0_0_24px_rgba(19,201,232,0.12)]">
+                      <Image alt="" aria-hidden="true" height={56} src={service.iconSrc} width={56} />
                     </span>
                     <h3 className="text-lg font-black uppercase text-white">{service.title}</h3>
                   </div>
