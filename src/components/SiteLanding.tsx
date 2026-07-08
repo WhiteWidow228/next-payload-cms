@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { EstimatePopup } from "@/components/EstimatePopup";
-import { RegionSelect } from "@/components/RegionSelect";
 import { listCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
 
@@ -19,14 +17,6 @@ type WorkCard = {
   team: Array<{ name: string; avatar: string }>;
   ctaLabel: string;
 };
-
-const navItems = [
-  { label: "Главная", href: "#главная" },
-  { label: "Услуги", href: "#услуги" },
-  { label: "Проекты", href: "#работы-компании" },
-  { label: "Отзывы", href: "#отзывы" },
-  { label: "FAQ", href: "#faq" },
-];
 
 const stats = [
   { label: "Клиентов", value: "50+" },
@@ -194,34 +184,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
   return (
     <main className="min-h-screen bg-[#090909] px-3 py-5 text-[#f5f5f1] sm:px-5 lg:px-8">
       <div className="mx-auto flex max-w-[1380px] flex-col gap-5">
-        <header className="animate-fade-up sticky top-4 z-50 flex min-h-20 flex-wrap items-center justify-between gap-3 rounded-[14px] border border-white/5 bg-[#171717]/92 px-4 py-3 shadow-[0_18px_70px_rgba(0,0,0,0.36)] backdrop-blur-xl sm:px-6">
-          <Link className="text-sm font-black uppercase tracking-[0.08em] text-white" href="/">
-            Core Devs
-          </Link>
-          <nav className="hidden items-center gap-2 md:flex">
-            {navItems.map((item) => (
-              <a
-                className="rounded-lg border border-white/5 bg-[#111] px-5 py-3 text-[11px] font-bold uppercase text-white/70 transition duration-300 hover:border-cyan-300/60 hover:text-cyan-300"
-                href={item.href}
-                key={item.label}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
-            <RegionSelect currentHref={page.href} />
-            <a
-              className="rounded-lg bg-[#13c9e8] px-4 py-3 text-[11px] font-black uppercase text-[#071012] shadow-[0_0_30px_rgba(19,201,232,0.35)] transition duration-300 hover:-translate-y-0.5 hover:bg-white sm:px-5"
-              data-estimate-trigger
-              href="#"
-            >
-              Контакты
-            </a>
-          </div>
-        </header>
 
-        <section className="grid gap-3 lg:grid-cols-[1.95fr_1fr]" id="главная">
+        <section className="grid gap-3 lg:grid-cols-[1.95fr_1fr]" id="home">
           <div className="animate-fade-up group relative overflow-hidden rounded-[16px] border border-white/5 bg-[#171717] p-8 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] sm:p-12 lg:min-h-[430px] lg:p-14">
             <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_75%_35%,rgba(19,201,232,0.12),transparent_24rem)] opacity-80" />
             <div className="relative z-10 flex h-full max-w-4xl flex-col justify-center">
@@ -294,7 +258,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </a>
         </section>
 
-        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="услуги">
+        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="services">
           <SectionTitle title="Услуги компании" />
           <div className="grid gap-1.5 bg-white/[0.03] p-1.5 md:grid-cols-2">
             {services.map((service, index) => (
@@ -325,9 +289,9 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </div>
         </section>
 
-        <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="работы-компании">
+        <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="works">
           <div className="flex items-center justify-between border-b border-white/5 px-8 py-8 sm:px-10">
-            <h2 className="text-3xl font-black uppercase tracking-[-0.02em] text-white sm:text-4xl">Работы компании</h2>
+            <h2 className="text-3xl font-black uppercase text-white sm:text-4xl">Работы компании</h2>
             <Link
               className="rounded-full bg-white/[0.03] px-5 py-3 text-[11px] font-black uppercase text-white/54 transition hover:text-cyan-300"
               href="/portfolio"
@@ -342,7 +306,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </div>
         </section>
 
-        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="отзывы">
+        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="reviews">
           <SectionTitle title="Отзывы" />
           <div className="grid gap-2 bg-white/[0.03] p-2 md:grid-cols-2 xl:grid-cols-4">
             {reviews.map((review, index) => (
@@ -431,29 +395,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
             </a>
           </div>
         </section>
-
-        <footer className="overflow-hidden pb-5">
-          <div className="flex w-[200%] gap-4 border-y border-white/5 py-3 text-[11px] font-black uppercase text-white/32 animate-marquee">
-            {Array.from({ length: 16 }).map((_, index) => (
-              <span key={index}>Следите за нами в соцсетях <span className="mx-3 text-[#13c9e8]">*</span></span>
-            ))}
-          </div>
-          <div className="mt-5 grid gap-4 md:grid-cols-[0.7fr_2fr]">
-            <a
-              className="flex h-20 items-center justify-between rounded-[14px] border border-white/5 bg-[#171717] px-6 text-white/50 transition hover:text-cyan-300"
-              data-estimate-trigger
-              href="#"
-            >
-              Telegram <span>↗</span>
-            </a>
-            <div className="flex min-h-20 flex-col justify-center gap-2 rounded-[14px] border border-white/5 bg-[#171717] px-8 py-5 text-sm text-white/40 md:flex-row md:items-center md:justify-between">
-              <span>© 2026 Core Devs. Все права защищены.</span>
-              <span>Условия&nbsp;&nbsp; Политика конфиденциальности</span>
-            </div>
-          </div>
-        </footer>
       </div>
-      <EstimatePopup />
     </main>
   );
 }
@@ -461,7 +403,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 function SectionTitle({ title }: { title: string }) {
   return (
     <div className="px-8 py-8 sm:px-10">
-      <h2 className="text-3xl font-black uppercase tracking-[-0.02em] text-white sm:text-4xl">{title}</h2>
+      <h2 className="text-3xl font-black uppercase text-white sm:text-4xl">{title}</h2>
     </div>
   );
 }

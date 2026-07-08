@@ -1,4 +1,6 @@
-﻿@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,XOPQ,XTRA,YOPQ,YTDE,YTFI,YTLC,YTUC@8..144,100..1000,96,468,79,-203,738,514,712&display=swap");
+@import "tailwindcss";
 
 :root {
   color-scheme: dark;
@@ -26,7 +28,9 @@ body {
   background:
     radial-gradient(circle at 20% 0%, rgba(15, 211, 238, 0.1), transparent 28rem),
     linear-gradient(180deg, #0b0b0b 0%, #080808 100%);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Roboto Mono", monospace;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 button,
@@ -34,6 +38,16 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Roboto Flex", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
 }
 
 ::selection {
@@ -52,21 +66,13 @@ select {
   }
 }
 
-@keyframes floatSoft {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 @keyframes pulseRing {
   0% {
     transform: scale(0.72);
     opacity: 0.68;
   }
-  70%, 100% {
+  70%,
+  100% {
     transform: scale(1.35);
     opacity: 0;
   }
@@ -90,12 +96,19 @@ select {
   }
 }
 
-.animate-fade-up {
-  animation: fadeUp 0.7s ease both;
+@keyframes popupIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.animate-float-soft {
-  animation: floatSoft 5s ease-in-out infinite;
+.animate-fade-up {
+  animation: fadeUp 0.7s ease both;
 }
 
 .animate-marquee {
@@ -104,6 +117,10 @@ select {
 
 .animate-glow-sweep {
   animation: glowSweep 3.4s ease-in-out infinite;
+}
+
+.animate-popup-in {
+  animation: popupIn 0.24s ease both;
 }
 
 .pulse-ring::before,
@@ -118,19 +135,4 @@ select {
 
 .pulse-ring::after {
   animation-delay: 0.8s;
-}
-
-@keyframes popupIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.animate-popup-in {
-  animation: popupIn 0.24s ease both;
 }
