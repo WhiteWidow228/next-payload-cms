@@ -1,3 +1,4 @@
+import "./globals.css";
 import type { Metadata } from "next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://next-payload-cms-beige.vercel.app";
