@@ -191,7 +191,6 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 
         <section className="grid gap-3 lg:grid-cols-[1.95fr_1fr]" id="home">
           <div className="animate-fade-up group relative overflow-hidden rounded-[16px] border border-white/5 bg-[#171717] p-8 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] sm:p-12 lg:min-h-[430px] lg:p-14">
-            <div className="absolute inset-y-0 right-0 w-1/2 bg-[radial-gradient(circle_at_75%_35%,rgba(19,201,232,0.12),transparent_24rem)] opacity-80" />
             <div className="relative z-10 flex h-full max-w-4xl flex-col justify-center">
               <button
                 className="mb-6 inline-flex w-fit cursor-pointer items-center gap-3 rounded-full border border-cyan-300/15 bg-cyan-300/5 px-4 py-2 text-xs font-black uppercase text-cyan-300 transition hover:border-cyan-300/45"
