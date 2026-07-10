@@ -11,7 +11,7 @@ export default function SiteLayout({
   return (
     <>
       <SiteHeader />
-      {children}
+      <div className="pt-[92px] sm:pt-[108px]">{children}</div>
       <SiteFooter />
       <EstimatePopup />
       <CustomCursor />

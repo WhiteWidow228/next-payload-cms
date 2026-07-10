@@ -24,7 +24,7 @@ export function SiteHeader() {
   const getSectionHref = (anchor: string) => `${sectionBase === "/" ? "/" : sectionBase}#${anchor}`;
 
   return (
-    <header className="sticky top-3 z-50 px-3 pt-3 sm:px-5 lg:px-8">
+    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 lg:px-8">
       <div className="mx-auto max-w-[1380px] rounded-[14px] border border-white/5 bg-[#171717]/94 shadow-[0_18px_70px_rgba(0,0,0,0.36)] backdrop-blur-xl">
         <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-3 sm:min-h-20 sm:px-6">
           <Link className="font-display text-sm font-black uppercase tracking-[0.08em] text-white" href={currentRegionHref} onClick={() => setIsOpen(false)}>
