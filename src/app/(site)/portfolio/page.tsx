@@ -17,7 +17,7 @@ export default async function PortfolioPage() {
   const [works, categories] = await Promise.all([listCompanyWorkItems(), listProjectCategories()]);
 
   return (
-    <main className="min-h-screen bg-[#090909] px-4 py-5 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen px-4 py-5 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1380px]">
 
         <section className="mt-5 rounded-[18px] border border-white/5 bg-[#171717] p-8 sm:p-12">

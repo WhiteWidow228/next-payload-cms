@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           : "";
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[#090909] px-4 text-white">
+    <main className="grid min-h-screen place-items-center px-4 text-white">
       <form action="/admin/session" method="post" className="w-full max-w-md rounded-2xl border border-white/10 bg-[#171717] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
         <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Core Devs Admin</p>
         <h1 className="mt-3 text-3xl font-black uppercase">Вход</h1>

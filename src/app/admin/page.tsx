@@ -26,7 +26,7 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#090909] px-4 py-8 text-white sm:px-8">
+    <main className="min-h-screen px-4 py-8 text-white sm:px-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-8 flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#171717] p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>

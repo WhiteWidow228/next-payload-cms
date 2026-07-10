@@ -76,6 +76,22 @@ export function EstimatePopup() {
         <h2 className="mt-3 text-3xl font-black uppercase leading-tight text-white sm:text-4xl">
           Рассчитать смету прямо сейчас
         </h2>
+        <div className="mt-7 grid gap-3">
+          <a
+            className="flex h-12 items-center justify-center rounded-lg bg-[#13c9e8] px-5 text-sm font-black uppercase text-[#071012] transition hover:bg-white"
+            href="https://t.me/core_devs"
+            rel="noreferrer"
+            target="_blank"
+          >
+            @core_devs
+          </a>
+          <a
+            className="text-sm font-bold text-white/55 transition hover:text-cyan-300"
+            href="mailto:coredevs@yandex.com"
+          >
+            coredevs@yandex.com
+          </a>
+        </div>
       </div>
     </div>
   );

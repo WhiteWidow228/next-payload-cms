@@ -186,7 +186,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
   const works = await getCompanyWorks();
 
   return (
-    <main className="min-h-screen bg-[#090909] px-3 py-5 text-[#f5f5f1] sm:px-5 lg:px-8">
+    <main className="min-h-screen px-3 py-5 text-[#f5f5f1] sm:px-5 lg:px-8">
       <div className="mx-auto flex max-w-[1380px] flex-col gap-5">
 
         <section className="grid gap-3 lg:grid-cols-[1.95fr_1fr]" id="home">
@@ -371,7 +371,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
               </p>
             </div>
             <a
-              className="flex h-14 min-w-44 items-center justify-center rounded-lg bg-[#090909] px-7 text-xs font-black uppercase text-white transition duration-300 hover:-translate-y-1 hover:bg-white hover:text-[#071012]"
+              className="flex h-14 min-w-44 items-center justify-center rounded-lg bg-[#071012] px-7 text-xs font-black uppercase text-white transition duration-300 hover:-translate-y-1 hover:bg-white hover:text-[#071012]"
               data-estimate-trigger
               href="#"
             >

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     default: "Веб-студия в Крыму | Core Devs",
     template: "%s | Core Devs",
   },
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+  },
   description: "Core Devs - веб-студия: сайты, Telegram-боты, интернет-магазины и веб-приложения для бизнеса.",
   openGraph: {
     type: "website",
