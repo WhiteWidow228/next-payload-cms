@@ -51,8 +51,8 @@ export function TeamSlider() {
   }
 
   return (
-    <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="team">
-      <div className="flex flex-col gap-5 border-b border-white/5 px-8 py-8 sm:px-10 lg:flex-row lg:items-end lg:justify-between">
+    <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="team">
+      <div className="flex flex-col gap-5 border-b border-white/5 px-8 pb-8 pt-[50px] sm:px-10 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Core Devs team</p>
           <h2 className="mt-3 text-3xl font-black uppercase text-white sm:text-4xl">Наша команда</h2>

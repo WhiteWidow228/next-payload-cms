@@ -187,7 +187,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 
   return (
     <main className="min-h-screen px-3 py-5 text-[#f5f5f1] sm:px-5 lg:px-8">
-      <div className="mx-auto flex max-w-[1380px] flex-col gap-5">
+      <div className="mx-auto flex max-w-[1380px] flex-col">
 
         <section className="grid gap-3 lg:grid-cols-[1.95fr_1fr]" id="home">
           <div className="animate-fade-up group relative overflow-hidden rounded-[16px] border border-white/5 bg-[#171717] p-8 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.02)] sm:p-12 lg:min-h-[430px] lg:p-14">
@@ -232,7 +232,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </article>
         </section>
 
-        <section className="grid gap-2 rounded-[16px] border border-white/5 bg-[#111] p-2 md:grid-cols-[repeat(4,1fr)_1.05fr]">
+        <section className="mt-[50px] grid gap-2 rounded-[16px] border border-white/5 bg-[#111] p-2 md:grid-cols-[repeat(4,1fr)_1.05fr]">
           {stats.map((stat, index) => (
             <div
               className="animate-fade-up rounded-xl border border-white/5 bg-[#171717] px-6 py-5 text-center"
@@ -254,7 +254,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </a>
         </section>
 
-        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="services">
+        <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="services">
           <SectionTitle title="Услуги компании" />
           <div className="grid gap-1.5 bg-white/[0.03] p-1.5 md:grid-cols-2">
             {services.map((service, index) => (
@@ -285,8 +285,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </div>
         </section>
 
-        <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="works">
-          <div className="flex items-center justify-between border-b border-white/5 px-8 py-8 sm:px-10">
+        <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="works">
+          <div className="flex items-center justify-between border-b border-white/5 px-8 pb-8 pt-[50px] sm:px-10">
             <h2 className="text-3xl font-black uppercase text-white sm:text-4xl">Работы компании</h2>
             <Link
               className="rounded-full bg-white/[0.03] px-5 py-3 text-[11px] font-black uppercase text-white/54 transition hover:text-cyan-300"
@@ -304,7 +304,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 
         <TeamSlider />
 
-        <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="reviews">
+        <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="reviews">
           <SectionTitle title="Отзывы" />
           <div className="grid gap-2 bg-white/[0.03] p-2 md:grid-cols-2 xl:grid-cols-4">
             {reviews.map((review, index) => (
@@ -336,7 +336,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </div>
         </section>
 
-        <section className="mt-20 grid gap-2 lg:grid-cols-[1.55fr_1fr]" id="faq">
+        <section className="mt-[50px] grid gap-2 lg:grid-cols-[1.55fr_1fr]" id="faq">
           <div className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]">
             <SectionTitle title="Часто задаваемые вопросы" />
             <FaqAccordion items={faqs} />
@@ -359,7 +359,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 
         <SeoTextSection page={page} />
 
-        <section className="relative mt-20 overflow-hidden rounded-[18px] bg-[#13c9e8] p-8 text-[#071012] shadow-[0_0_80px_rgba(19,201,232,0.22)] sm:p-12" id="contact">
+        <section className="relative mt-[50px] overflow-hidden rounded-[18px] bg-[#13c9e8] px-8 pb-8 pt-[50px] text-[#071012] shadow-[0_0_80px_rgba(19,201,232,0.22)] sm:px-12 sm:pb-12" id="contact">
           <div className="animate-glow-sweep pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-white/25 blur-xl" />
           <div className="relative z-10 flex flex-col justify-between gap-8 lg:flex-row lg:items-center">
             <div>
@@ -386,7 +386,7 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <div className="px-8 py-8 sm:px-10">
+    <div className="px-8 pb-8 pt-[50px] sm:px-10">
       <h2 className="text-3xl font-black uppercase text-white sm:text-4xl">{title}</h2>
     </div>
   );
@@ -394,8 +394,8 @@ function SectionTitle({ title }: { title: string }) {
 
 function SeoTextSection({ page }: { page: SeoRegionPage }) {
   return (
-    <section className="mt-20 overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="seo">
-      <div className="grid gap-8 p-8 sm:p-10 lg:grid-cols-[1.25fr_0.75fr]">
+    <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="seo">
+      <div className="grid gap-8 px-8 pb-8 pt-[50px] sm:px-10 sm:pb-10 lg:grid-cols-[1.25fr_0.75fr]">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-300">Core Devs · {page.regionLabel}</p>
           <h2 className="mt-4 max-w-4xl text-3xl font-black uppercase leading-tight text-white sm:text-4xl">

@@ -59,7 +59,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="min-h-screen px-4 py-5 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1380px]">
-        <section className="mt-5 rounded-[18px] border border-white/5 bg-[#171717] p-8 sm:p-12">
+        <section className="mt-[50px] rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px] sm:px-12 sm:pb-12">
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-cyan-300/10 px-4 py-2 text-xs font-black uppercase text-cyan-300">{work.category}</span>
             <span className="text-xs font-bold uppercase tracking-[0.16em] text-white/35">{work.timeTaken}</span>
@@ -77,7 +77,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
 
-        <section className="mt-4 overflow-hidden rounded-[18px] border border-white/5 bg-[#111]">
+        <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#111]">
           <div className="relative min-h-[360px] sm:min-h-[520px] lg:min-h-[720px]">
             <Image
               alt={work.imageAlt || work.title}
@@ -90,8 +90,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <article className="rounded-[18px] border border-white/5 bg-[#171717] p-8">
+        <section className="mt-[50px] grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <article className="rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px]">
             <h2 className="text-xl font-black uppercase">О проекте</h2>
             <div className="mt-5 grid gap-5 text-sm leading-7 text-white/55">
               {aboutParagraphs.map((paragraph) => (
@@ -101,7 +101,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </article>
 
           <aside className="grid gap-4">
-            <div className="rounded-[18px] border border-white/5 bg-[#171717] p-8">
+            <div className="rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px]">
               <h2 className="text-xl font-black uppercase">Команда проекта</h2>
               <div className="mt-6 grid gap-3">
                 {work.teamMembers.length ? (
@@ -117,7 +117,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
 
-            <div className="rounded-[18px] border border-white/5 bg-[#171717] p-8">
+            <div className="rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px]">
               <h2 className="text-xl font-black uppercase">Нужен похожий проект?</h2>
               <p className="mt-4 text-sm leading-6 text-white/50">
                 Подготовим структуру, дизайн, разработку и запуск под вашу нишу, регион и реальные задачи бизнеса.

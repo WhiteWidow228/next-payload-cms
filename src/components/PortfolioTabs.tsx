@@ -12,7 +12,7 @@ export function PortfolioTabs({ categories, works }: { categories: ProjectCatego
   const filteredWorks = activeSlug === "all" ? works : works.filter((work) => work.categorySlug === activeSlug);
 
   return (
-    <section className="mt-8">
+    <section className="mt-[50px]">
       <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (
           <button

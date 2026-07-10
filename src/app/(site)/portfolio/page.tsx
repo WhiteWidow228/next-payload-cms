@@ -20,7 +20,7 @@ export default async function PortfolioPage() {
     <main className="min-h-screen px-4 py-5 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1380px]">
 
-        <section className="mt-5 rounded-[18px] border border-white/5 bg-[#171717] p-8 sm:p-12">
+        <section className="mt-[50px] rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px] sm:px-12 sm:pb-12">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-300">Портфолио Core Devs</p>
           <h1 className="mt-5 max-w-5xl text-4xl font-black uppercase leading-none text-white sm:text-6xl lg:text-[68px]">
             Все проекты студии
