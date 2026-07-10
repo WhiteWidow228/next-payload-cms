@@ -461,7 +461,6 @@ function WorkProjectCard({ work, index }: { work: WorkCard; index: number }) {
         <div className="space-y-5 text-sm text-white/48">
           <p>Категория - <span className="text-white/75">{work.category}</span></p>
           <p>Срок - <span className="text-white/75">{work.timeTaken}</span></p>
-          <p className="leading-6">{work.summary}</p>
         </div>
       </div>
 

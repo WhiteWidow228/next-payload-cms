@@ -10,10 +10,12 @@ const emptyWork: Partial<CompanyWorkItem> = {
   slug: "",
   title: "",
   summary: "",
+  projectText: "",
   category: "Сайты",
   categorySlug: "sites",
   timeTaken: "3 месяца",
   image: "/assets/work-aura-clean.jpg",
+  detailImage: "/assets/work-aura-clean.jpg",
   imageAlt: "Превью проекта",
   technologies: ["Next.js", "React", "PostgreSQL"],
   teamMembers: [
@@ -37,6 +39,8 @@ export function WorkForm({
   work?: CompanyWorkItem | null;
 }) {
   const item = work || emptyWork;
+  const projectText = item.projectText || item.summary || "";
+  const detailImage = item.detailImage || item.image || "";
   const technologies = item.technologies?.join("\n") || "";
   const teamMembers = item.teamMembers?.map((member) => member.name).join("\n") || "";
   const selectedCategory = item.categorySlug || categories[0]?.slug || "sites";
@@ -64,7 +68,7 @@ export function WorkForm({
 
         {error ? (
           <p className="mb-5 rounded-xl bg-red-500/10 p-4 text-sm text-red-200">
-            {error === "save" ? "Проверь поля проекта. Возможно, такой slug уже занят." : "Заполни название и описание проекта."}
+            {error === "save" ? "Проверь поля проекта. Возможно, такой slug уже занят." : "Заполни название и короткое описание проекта."}
           </p>
         ) : null}
 
@@ -78,11 +82,13 @@ export function WorkForm({
             <CategorySelect categories={categories} value={selectedCategory} />
             <Field label="Срок" name="timeTaken" value={item.timeTaken} />
           </div>
-          <TextArea label="Описание" name="summary" required rows={5} value={item.summary} />
+          <TextArea label="Короткое описание" name="summary" required rows={4} value={item.summary} />
+          <TextArea label="Текст о проекте" name="projectText" rows={7} value={projectText} />
           <div className="grid gap-5 md:grid-cols-2">
-            <MediaPicker assets={mediaItems} label="Путь к изображению" name="image" value={item.image} />
-            <Field label="Alt изображения" name="imageAlt" value={item.imageAlt} />
+            <MediaPicker assets={mediaItems} label="Превью проекта для карточек" name="image" value={item.image} />
+            <MediaPicker assets={mediaItems} label="Фото внутри проекта во всю ширину" name="detailImage" value={detailImage} />
           </div>
+          <Field label="Alt изображения" name="imageAlt" value={item.imageAlt} />
           <div className="grid gap-5 md:grid-cols-2">
             <TextArea label="Технологии, каждая с новой строки" name="technologies" rows={6} value={technologies} />
             <TextArea label="Команда, каждый участник с новой строки" name="teamMembers" rows={6} value={teamMembers} />

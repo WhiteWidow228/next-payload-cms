@@ -22,10 +22,12 @@ export type CompanyWorkItem = {
   slug: string;
   title: string;
   summary: string;
+  projectText: string;
   category: string;
   categorySlug: string;
   timeTaken: string;
   image: string;
+  detailImage: string;
   imageAlt: string;
   technologies: string[];
   teamMembers: TeamMember[];
@@ -331,6 +333,8 @@ export async function ensureCompanyWorkTable() {
   `);
 
   await getDb().query("ALTER TABLE company_work_items ADD COLUMN IF NOT EXISTS slug TEXT");
+  await getDb().query("ALTER TABLE company_work_items ADD COLUMN IF NOT EXISTS project_text TEXT NOT NULL DEFAULT ''");
+  await getDb().query("ALTER TABLE company_work_items ADD COLUMN IF NOT EXISTS detail_image TEXT NOT NULL DEFAULT ''");
   await getDb().query("ALTER TABLE company_work_items ADD COLUMN IF NOT EXISTS category_slug TEXT NOT NULL DEFAULT 'sites'");
   await getDb().query("UPDATE company_work_items SET slug = CONCAT('work-', id) WHERE slug IS NULL OR slug = ''");
   await getDb().query("UPDATE company_work_items SET slug = 'zenith-fitness-app' WHERE title ILIKE '%Zenith%' AND slug LIKE 'work-%'");
@@ -377,10 +381,12 @@ function mapCompanyWork(row: Record<string, unknown>): CompanyWorkItem {
     slug: String(row.slug || `work-${row.id}`),
     title: String(row.title || ""),
     summary: String(row.summary || ""),
+    projectText: String(row.projectText || row.project_text || ""),
     category: String(row.category || ""),
     categorySlug: String(row.categorySlug || row.category_slug || "sites"),
     timeTaken: String(row.timeTaken || row.time_taken || ""),
     image: String(row.image || ""),
+    detailImage: String(row.detailImage || row.detail_image || ""),
     imageAlt: String(row.imageAlt || row.image_alt || ""),
     technologies: Array.isArray(row.technologies) ? row.technologies.map(String) : [],
     teamMembers: normalizeTeamMembers(row.teamMembers || row.team_members),
@@ -595,10 +601,12 @@ const workSelect = `
     slug,
     title,
     summary,
+    project_text AS "projectText",
     category,
     category_slug AS "categorySlug",
     time_taken AS "timeTaken",
     image,
+    detail_image AS "detailImage",
     image_alt AS "imageAlt",
     technologies,
     team_members AS "teamMembers",
@@ -640,25 +648,29 @@ export async function createCompanyWorkItem(input: CompanyWorkInput) {
         slug,
         title,
         summary,
+        project_text,
         category,
         category_slug,
         time_taken,
         image,
+        detail_image,
         image_alt,
         technologies,
         team_members,
         cta_label,
         sort_order
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13, $14)
     `,
     [
       input.slug,
       input.title,
       input.summary,
+      input.projectText,
       input.category,
       input.categorySlug,
       input.timeTaken,
       input.image,
+      input.detailImage,
       input.imageAlt,
       input.technologies,
       JSON.stringify(input.teamMembers),
@@ -678,15 +690,17 @@ export async function updateCompanyWorkItem(id: number, input: CompanyWorkInput)
         slug = $2,
         title = $3,
         summary = $4,
-        category = $5,
-        category_slug = $6,
-        time_taken = $7,
-        image = $8,
-        image_alt = $9,
-        technologies = $10,
-        team_members = $11::jsonb,
-        cta_label = $12,
-        sort_order = $13,
+        project_text = $5,
+        category = $6,
+        category_slug = $7,
+        time_taken = $8,
+        image = $9,
+        detail_image = $10,
+        image_alt = $11,
+        technologies = $12,
+        team_members = $13::jsonb,
+        cta_label = $14,
+        sort_order = $15,
         updated_at = NOW()
       WHERE id = $1
     `,
@@ -695,10 +709,12 @@ export async function updateCompanyWorkItem(id: number, input: CompanyWorkInput)
       input.slug,
       input.title,
       input.summary,
+      input.projectText,
       input.category,
       input.categorySlug,
       input.timeTaken,
       input.image,
+      input.detailImage,
       input.imageAlt,
       input.technologies,
       JSON.stringify(input.teamMembers),
