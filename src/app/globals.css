@@ -136,3 +136,144 @@ h4,
 .pulse-ring::after {
   animation-delay: 0.8s;
 }
+:root {
+  --motion-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+a,
+button,
+[role="button"] {
+  transition-timing-function: var(--motion-smooth);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate3d(0, 34px, 0) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes glowSweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  18%,
+  70% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.96s var(--motion-smooth) both;
+  will-change: opacity, filter, transform;
+}
+
+.animate-glow-sweep {
+  animation: glowSweep 4.8s var(--motion-smooth) infinite;
+}
+
+.pulse-ring::before,
+.pulse-ring::after {
+  animation-duration: 3.2s;
+}
+
+.custom-cursor-dot,
+.custom-cursor-ring {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .custom-cursor-active,
+  .custom-cursor-active body,
+  .custom-cursor-active a,
+  .custom-cursor-active button,
+  .custom-cursor-active [role="button"] {
+    cursor: none !important;
+  }
+
+  .custom-cursor-active input,
+  .custom-cursor-active textarea,
+  .custom-cursor-active select {
+    cursor: auto !important;
+  }
+
+  .custom-cursor-dot,
+  .custom-cursor-ring {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 9999;
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.24s var(--motion-smooth),
+      height 0.24s var(--motion-smooth),
+      opacity 0.18s ease,
+      background-color 0.24s ease,
+      border-color 0.24s ease;
+  }
+
+  .custom-cursor-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #13c9e8;
+    box-shadow: 0 0 18px rgba(19, 201, 232, 0.9);
+  }
+
+  .custom-cursor-ring {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(19, 201, 232, 0.52);
+    border-radius: 999px;
+    background: rgba(19, 201, 232, 0.055);
+    box-shadow: 0 0 36px rgba(19, 201, 232, 0.18);
+  }
+
+  .custom-cursor-visible .custom-cursor-dot,
+  .custom-cursor-visible .custom-cursor-ring {
+    opacity: 1;
+  }
+
+  .custom-cursor-interactive .custom-cursor-ring {
+    width: 58px;
+    height: 58px;
+    border-color: rgba(19, 201, 232, 0.86);
+    background: rgba(19, 201, 232, 0.12);
+  }
+
+  .custom-cursor-pressed .custom-cursor-ring {
+    width: 30px;
+    height: 30px;
+    background: rgba(19, 201, 232, 0.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,7 +1,10 @@
 import Link from "next/link";
 
+import { MediaPicker } from "@/components/admin/MediaPicker";
+
 import { deleteWorkAction, saveWorkAction } from "./actions";
 import type { CompanyWorkItem, ProjectCategory } from "@/lib/db";
+import type { MediaLibraryItem } from "@/lib/media-library";
 
 const emptyWork: Partial<CompanyWorkItem> = {
   slug: "",
@@ -25,10 +28,12 @@ const emptyWork: Partial<CompanyWorkItem> = {
 export function WorkForm({
   categories,
   error,
+  mediaItems = [],
   work,
 }: {
   categories: ProjectCategory[];
   error?: string;
+  mediaItems?: MediaLibraryItem[];
   work?: CompanyWorkItem | null;
 }) {
   const item = work || emptyWork;
@@ -75,7 +80,7 @@ export function WorkForm({
           </div>
           <TextArea label="Описание" name="summary" required rows={5} value={item.summary} />
           <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Путь к изображению" name="image" value={item.image} />
+            <MediaPicker assets={mediaItems} label="Путь к изображению" name="image" value={item.image} />
             <Field label="Alt изображения" name="imageAlt" value={item.imageAlt} />
           </div>
           <div className="grid gap-5 md:grid-cols-2">

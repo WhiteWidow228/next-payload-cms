@@ -55,6 +55,25 @@ export type AdminUserInput = {
   passwordHash?: string;
   isActive: boolean;
 };
+export type MediaAsset = {
+  id: number;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  src: string;
+  createdAt: string;
+};
+
+export type MediaAssetInput = {
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  content: Buffer;
+};
+
+export type MediaAssetRecord = MediaAsset & {
+  content: Buffer;
+};
 const DATABASE_ENV_KEYS = [
   "DATABASE_URI",
   "DATABASE_URL",
@@ -692,4 +711,99 @@ export async function updateCompanyWorkItem(id: number, input: CompanyWorkInput)
 export async function deleteCompanyWorkItem(id: number) {
   await ensureCompanyWorkTable();
   await getDb().query("DELETE FROM company_work_items WHERE id = $1", [id]);
+}
+async function ensureMediaAssetsTable() {
+  await getDb().query(`
+    CREATE TABLE IF NOT EXISTS media_assets (
+      id SERIAL PRIMARY KEY,
+      file_name TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      size_bytes INTEGER NOT NULL DEFAULT 0,
+      content BYTEA NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await getDb().query("CREATE INDEX IF NOT EXISTS media_assets_created_at_idx ON media_assets (created_at DESC)");
+}
+
+function mapMediaAsset(row: Record<string, unknown>): MediaAsset {
+  const id = Number(row.id);
+
+  return {
+    id,
+    fileName: String(row.fileName || row.file_name || "image"),
+    mimeType: String(row.mimeType || row.mime_type || "application/octet-stream"),
+    sizeBytes: Number(row.sizeBytes || row.size_bytes || 0),
+    src: `/api/media/${id}`,
+    createdAt: String(row.createdAt || row.created_at || ""),
+  };
+}
+
+function mapMediaAssetRecord(row: Record<string, unknown>): MediaAssetRecord {
+  const content = Buffer.isBuffer(row.content) ? row.content : Buffer.from([]);
+
+  return {
+    ...mapMediaAsset(row),
+    content,
+  };
+}
+
+const mediaAssetSelect = `
+  SELECT
+    id,
+    file_name AS "fileName",
+    mime_type AS "mimeType",
+    size_bytes AS "sizeBytes",
+    created_at AS "createdAt"
+  FROM media_assets
+`;
+
+export async function listMediaAssets() {
+  await ensureMediaAssetsTable();
+
+  const result = await getDb().query(`${mediaAssetSelect} ORDER BY created_at DESC, id DESC`);
+
+  return result.rows.map(mapMediaAsset);
+}
+
+export async function getMediaAsset(id: number) {
+  await ensureMediaAssetsTable();
+
+  const result = await getDb().query(
+    `
+      SELECT
+        id,
+        file_name AS "fileName",
+        mime_type AS "mimeType",
+        size_bytes AS "sizeBytes",
+        content,
+        created_at AS "createdAt"
+      FROM media_assets
+      WHERE id = $1
+    `,
+    [id],
+  );
+
+  return result.rows[0] ? mapMediaAssetRecord(result.rows[0]) : null;
+}
+
+export async function createMediaAsset(input: MediaAssetInput) {
+  await ensureMediaAssetsTable();
+
+  const result = await getDb().query(
+    `
+      INSERT INTO media_assets (file_name, mime_type, size_bytes, content)
+      VALUES ($1, $2, $3, $4)
+      RETURNING
+        id,
+        file_name AS "fileName",
+        mime_type AS "mimeType",
+        size_bytes AS "sizeBytes",
+        created_at AS "createdAt"
+    `,
+    [input.fileName, input.mimeType, input.sizeBytes, input.content],
+  );
+
+  return mapMediaAsset(result.rows[0]);
 }
