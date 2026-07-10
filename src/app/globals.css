@@ -25,9 +25,7 @@ body {
 body {
   margin: 0;
   color: var(--foreground);
-  background:
-    radial-gradient(circle at 20% 0%, rgba(15, 211, 238, 0.1), transparent 28rem),
-    linear-gradient(180deg, #0b0b0b 0%, #080808 100%);
+  background: linear-gradient(180deg, #0b0b0b 0%, #080808 100%);
   font-family: "Roboto Mono", monospace;
   font-optical-sizing: auto;
   font-style: normal;
