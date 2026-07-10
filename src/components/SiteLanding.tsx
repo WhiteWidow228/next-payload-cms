@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AnimatedStatValue } from "@/components/AnimatedStatValue";
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { TeamSlider } from "@/components/TeamSlider";
 
 import { listCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
@@ -301,6 +302,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
             ))}
           </div>
         </section>
+
+        <TeamSlider />
 
         <section className="overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="reviews">
           <SectionTitle title="Отзывы" />
