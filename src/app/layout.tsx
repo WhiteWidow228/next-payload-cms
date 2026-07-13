@@ -1,5 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { YandexMetrika } from "@/components/YandexMetrika";
 
 const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://next-payload-cms-beige.vercel.app";
 
@@ -29,7 +31,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Suspense fallback={null}>
+          <YandexMetrika />
+        </Suspense>
+      </body>
     </html>
   );
 }
