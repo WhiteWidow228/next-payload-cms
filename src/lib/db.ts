@@ -76,6 +76,26 @@ export type MediaAssetInput = {
 export type MediaAssetRecord = MediaAsset & {
   content: Buffer;
 };
+
+export type QuizLeadStatus = "new" | "processed";
+
+export type QuizLead = {
+  id: number;
+  projectType: string;
+  budget: string;
+  timeline: string;
+  contact: string;
+  sourcePath: string;
+  status: QuizLeadStatus;
+  consentVersion: string;
+  consentAt: string;
+  createdAt: string;
+};
+
+export type QuizLeadInput = Pick<
+  QuizLead,
+  "projectType" | "budget" | "timeline" | "contact" | "sourcePath" | "consentVersion"
+>;
 const DATABASE_ENV_KEYS = [
   "DATABASE_URI",
   "DATABASE_URL",
@@ -822,4 +842,93 @@ export async function createMediaAsset(input: MediaAssetInput) {
   );
 
   return mapMediaAsset(result.rows[0]);
+}
+
+async function ensureQuizLeadsTable() {
+  await getDb().query(`
+    CREATE TABLE IF NOT EXISTS quiz_leads (
+      id SERIAL PRIMARY KEY,
+      project_type TEXT NOT NULL,
+      budget TEXT NOT NULL,
+      timeline TEXT NOT NULL,
+      contact TEXT NOT NULL,
+      source_path TEXT NOT NULL DEFAULT '/',
+      status TEXT NOT NULL DEFAULT 'new',
+      consent_version TEXT NOT NULL,
+      consent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  await getDb().query("CREATE INDEX IF NOT EXISTS quiz_leads_created_at_idx ON quiz_leads (created_at DESC)");
+  await getDb().query("CREATE INDEX IF NOT EXISTS quiz_leads_status_idx ON quiz_leads (status, created_at DESC)");
+}
+
+function mapQuizLead(row: Record<string, unknown>): QuizLead {
+  return {
+    id: Number(row.id),
+    projectType: String(row.projectType || row.project_type || ""),
+    budget: String(row.budget || ""),
+    timeline: String(row.timeline || ""),
+    contact: String(row.contact || ""),
+    sourcePath: String(row.sourcePath || row.source_path || "/"),
+    status: row.status === "processed" ? "processed" : "new",
+    consentVersion: String(row.consentVersion || row.consent_version || ""),
+    consentAt: String(row.consentAt || row.consent_at || ""),
+    createdAt: String(row.createdAt || row.created_at || ""),
+  };
+}
+
+const quizLeadSelect = `
+  SELECT
+    id,
+    project_type AS "projectType",
+    budget,
+    timeline,
+    contact,
+    source_path AS "sourcePath",
+    status,
+    consent_version AS "consentVersion",
+    consent_at AS "consentAt",
+    created_at AS "createdAt"
+  FROM quiz_leads
+`;
+
+export async function createQuizLead(input: QuizLeadInput) {
+  await ensureQuizLeadsTable();
+
+  const result = await getDb().query(
+    `
+      INSERT INTO quiz_leads (
+        project_type,
+        budget,
+        timeline,
+        contact,
+        source_path,
+        consent_version
+      ) VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING id
+    `,
+    [input.projectType, input.budget, input.timeline, input.contact, input.sourcePath, input.consentVersion],
+  );
+
+  return Number(result.rows[0]?.id || 0);
+}
+
+export async function listQuizLeads() {
+  await ensureQuizLeadsTable();
+
+  const result = await getDb().query(`${quizLeadSelect} ORDER BY created_at DESC, id DESC`);
+
+  return result.rows.map(mapQuizLead);
+}
+
+export async function updateQuizLeadStatus(id: number, status: QuizLeadStatus) {
+  await ensureQuizLeadsTable();
+  await getDb().query("UPDATE quiz_leads SET status = $2 WHERE id = $1", [id, status]);
+}
+
+export async function deleteQuizLead(id: number) {
+  await ensureQuizLeadsTable();
+  await getDb().query("DELETE FROM quiz_leads WHERE id = $1", [id]);
 }

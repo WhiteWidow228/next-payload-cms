@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AnimatedStatValue } from "@/components/AnimatedStatValue";
 import { FaqAccordion } from "@/components/FaqAccordion";
+import { ProjectQuiz } from "@/components/ProjectQuiz";
 import { TeamSlider } from "@/components/TeamSlider";
 
 import { listCompanyWorkItems } from "@/lib/db";
@@ -231,6 +232,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
             </div>
           </article>
         </section>
+
+        <ProjectQuiz />
 
         <section className="mt-[50px] grid gap-2 rounded-[16px] border border-white/5 bg-[#111] p-2 md:grid-cols-[repeat(4,1fr)_1.05fr]">
           {stats.map((stat, index) => (

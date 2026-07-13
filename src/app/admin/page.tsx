@@ -37,6 +37,9 @@ export default async function AdminPage() {
             <Link className="rounded-lg bg-[#13c9e8] px-5 py-3 text-xs font-black uppercase text-[#071012]" href="/admin/work/new">
               Добавить проект
             </Link>
+            <Link className="rounded-lg border border-cyan-300/30 px-5 py-3 text-xs font-black uppercase text-cyan-300" href="/admin/leads">
+              Заявки
+            </Link>
             <Link className="rounded-lg border border-white/10 px-5 py-3 text-xs font-black uppercase text-white/70" href="/admin/categories">
               Категории
             </Link>

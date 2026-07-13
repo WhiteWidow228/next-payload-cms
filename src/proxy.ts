@@ -10,9 +10,12 @@ const buckets = new Map<string, Bucket>();
 
 const LIMITS = {
   admin: 40,
+  leads: 10,
   api: 80,
+  pagespeed: 1000,
   default: 180,
 };
+const PAGESPEED_USER_AGENT = /Chrome-Lighthouse|PageSpeed Insights|Google Page Speed Insights/i;
 
 function getClientIp(request: NextRequest) {
   const forwardedFor = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -22,16 +25,26 @@ function getClientIp(request: NextRequest) {
   return forwardedFor || realIp || vercelIp || "unknown";
 }
 
-function getLimit(pathname: string) {
+function getRequestGroup(request: NextRequest): keyof typeof LIMITS {
+  const { pathname } = request.nextUrl;
+
   if (pathname.startsWith("/admin")) {
-    return LIMITS.admin;
+    return "admin";
+  }
+
+  if (pathname === "/api/quiz-leads") {
+    return "leads";
   }
 
   if (pathname.startsWith("/api")) {
-    return LIMITS.api;
+    return "api";
   }
 
-  return LIMITS.default;
+  if (PAGESPEED_USER_AGENT.test(request.headers.get("user-agent") || "")) {
+    return "pagespeed";
+  }
+
+  return "default";
 }
 
 function cleanupBuckets(now: number) {
@@ -56,11 +69,11 @@ function applySecurityHeaders(response: NextResponse) {
 }
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
   const now = Date.now();
-  const limit = getLimit(pathname);
+  const group = getRequestGroup(request);
+  const limit = LIMITS[group];
   const ip = getClientIp(request);
-  const key = `${ip}:${pathname.startsWith("/admin") ? "admin" : pathname.startsWith("/api") ? "api" : "site"}`;
+  const key = `${ip}:${group}`;
   const current = buckets.get(key);
 
   cleanupBuckets(now);

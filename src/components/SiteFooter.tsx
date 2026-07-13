@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="px-3 pb-5 sm:px-5 lg:px-8">
@@ -26,7 +28,14 @@ export function SiteFooter() {
           </div>
           <div className="flex min-h-20 flex-col justify-center gap-2 rounded-[14px] border border-white/5 bg-[#171717] px-5 py-5 text-sm text-white/40 sm:px-8 md:flex-row md:items-center md:justify-between">
             <span>© 2026 Core Devs. Все права защищены.</span>
-            <span>Условия&nbsp;&nbsp; Политика конфиденциальности</span>
+            <nav className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Правовая информация">
+              <Link className="transition hover:text-cyan-300" href="/privacy">
+                Политика конфиденциальности
+              </Link>
+              <Link className="transition hover:text-cyan-300" href="/personal-data-consent">
+                Согласие на обработку данных
+              </Link>
+            </nav>
           </div>
         </div>
       </div>
