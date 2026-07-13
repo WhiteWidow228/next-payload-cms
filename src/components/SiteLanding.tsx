@@ -249,8 +249,6 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
           </article>
         </section>
 
-        <ProjectQuiz />
-
         <section className="mt-[50px] grid gap-2 rounded-[16px] border border-white/5 bg-[#111] p-2 md:grid-cols-[repeat(4,1fr)_1.05fr]">
           {stats.map((stat, index) => (
             <div
@@ -272,6 +270,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
             Заказать проект
           </a>
         </section>
+
+        <ProjectQuiz />
 
         <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="services">
           <SectionTitle title="Услуги компании" />
@@ -469,14 +469,12 @@ function WorkProjectCard({ work, index }: { work: WorkCard; index: number }) {
       style={{ animationDelay: `${index * 110}ms` }}
     >
       <div className="rounded-[12px] border border-white/5 bg-[#171717] p-7">
-        <div className="mb-12 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="grid size-10 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/10 text-cyan-300">✦</span>
-            <h3 className="text-base font-black uppercase text-white">{work.title}</h3>
-          </div>
+        <div className="mb-12 flex items-start justify-between gap-4">
+          <h3 className="min-w-0 flex-1 break-words text-base font-black uppercase text-white">{work.title}</h3>
           <Link
-            className="text-xs font-black uppercase text-white/55 transition hover:text-cyan-300"
+            className="shrink-0 text-xs font-black uppercase text-white/55 transition hover:text-cyan-300"
             href={`/portfolio/${work.slug}`}
+            prefetch={false}
           >
             ↗ Детали
           </Link>
@@ -487,9 +485,14 @@ function WorkProjectCard({ work, index }: { work: WorkCard; index: number }) {
         </div>
       </div>
 
-      <div className="relative min-h-[300px] overflow-hidden rounded-[12px] border border-white/5 bg-[#111] lg:min-h-[330px]">
-        <Image alt={work.imageAlt} className="object-cover transition duration-700 hover:scale-105" fill sizes="(max-width: 1024px) calc(100vw - 28px), 440px" src={work.image} />
-      </div>
+      <Link
+        aria-label={`Открыть кейс: ${work.title}`}
+        className="group relative block min-h-[300px] overflow-hidden rounded-[12px] border border-white/5 bg-[#111] lg:min-h-[330px]"
+        href={`/portfolio/${work.slug}`}
+        prefetch={false}
+      >
+        <Image alt={work.imageAlt} className="object-cover transition duration-700 group-hover:scale-105" fill sizes="(max-width: 1024px) calc(100vw - 28px), 440px" src={work.image} />
+      </Link>
 
       <div className="grid gap-2">
         <div className="rounded-[12px] border border-white/5 bg-[#171717] p-7">
