@@ -643,6 +643,15 @@ export async function listCompanyWorkItems() {
   return result.rows.map(mapCompanyWork);
 }
 
+export async function listLatestCompanyWorkItems(limit = 3) {
+  await ensureCompanyWorkTable();
+
+  const safeLimit = Math.min(Math.max(Math.floor(limit), 1), 12);
+  const result = await getDb().query(`${workSelect} ORDER BY created_at DESC, id DESC LIMIT $1`, [safeLimit]);
+
+  return result.rows.map(mapCompanyWork);
+}
+
 export async function getCompanyWorkItem(id: number) {
   await ensureCompanyWorkTable();
 

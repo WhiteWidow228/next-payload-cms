@@ -84,7 +84,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
               className="object-cover"
               fill
               priority
-              sizes="100vw"
+              sizes="(max-width: 1440px) calc(100vw - 48px), 1380px"
               src={detailImage}
             />
           </div>

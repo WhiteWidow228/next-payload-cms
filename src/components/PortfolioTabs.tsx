@@ -40,7 +40,7 @@ export function PortfolioTabs({ categories, works }: { categories: ProjectCatego
                     alt={work.imageAlt || work.title}
                     className="object-cover transition duration-700 group-hover:scale-105"
                     fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    sizes="(max-width: 1024px) calc(100vw - 32px), 670px"
                     src={work.image || "/assets/work-aura-clean.jpg"}
                   />
                 </div>

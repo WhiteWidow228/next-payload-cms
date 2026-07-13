@@ -6,7 +6,7 @@ import { FaqAccordion } from "@/components/FaqAccordion";
 import { ProjectQuiz } from "@/components/ProjectQuiz";
 import { TeamSlider } from "@/components/TeamSlider";
 
-import { listCompanyWorkItems } from "@/lib/db";
+import { listLatestCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages, type SeoRegionPage } from "@/lib/seo-regions";
 
 type WorkCard = {
@@ -92,6 +92,22 @@ const fallbackWorks: WorkCard[] = [
     })),
     ctaLabel: "Рассчитать смету",
   },
+  {
+    id: "presentation",
+    slug: "presentacia",
+    title: "Презентация компании «Спецстрой»",
+    summary: "Дизайн презентации строительной компании с понятной структурой услуг, преимуществ и выполненных проектов.",
+    category: "Дизайн",
+    timeTaken: "2 дня",
+    image: "/assets/work-aura-clean.jpg",
+    imageAlt: "Презентация компании Спецстрой",
+    technologies: ["Figma"],
+    team: [3, 4].map((item) => ({
+      name: `Участник команды ${item}`,
+      avatar: `/assets/avatar-${item}.png`,
+    })),
+    ctaLabel: "Рассчитать смету",
+  },
 ];
 
 const reviews = [
@@ -155,7 +171,7 @@ const faqs = [
 
 async function getCompanyWorks() {
   try {
-    const items = await listCompanyWorkItems();
+    const items = await listLatestCompanyWorkItems(3);
 
     if (!items.length) {
       return fallbackWorks;
@@ -222,8 +238,8 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
                 className="object-cover transition duration-700 group-hover:scale-105"
                 fill
                 priority
-                sizes="(max-width: 1024px) 100vw, 420px"
-                src="/assets/Image.jpg"
+                sizes="(max-width: 1024px) calc(100vw - 24px), 440px"
+                src="/assets/Image.webp"
               />
             </div>
             <div className="p-7">
@@ -289,19 +305,21 @@ export async function SiteLanding({ page }: { page: SeoRegionPage }) {
         </section>
 
         <section className="mt-[50px] overflow-hidden rounded-[18px] border border-white/5 bg-[#101010]" id="works">
-          <div className="flex items-center justify-between border-b border-white/5 px-8 pb-8 pt-[50px] sm:px-10">
+          <div className="border-b border-white/5 px-8 pb-8 pt-[50px] sm:px-10">
             <h2 className="text-3xl font-black uppercase text-white sm:text-4xl">Работы компании</h2>
-            <Link
-              className="rounded-full bg-white/[0.03] px-5 py-3 text-[11px] font-black uppercase text-white/54 transition hover:text-cyan-300"
-              href="/portfolio"
-            >
-              ↗ Все работы
-            </Link>
           </div>
           <div className="grid gap-2 bg-white/[0.03] p-2">
             {works.map((work, index) => (
               <WorkProjectCard index={index} key={work.id} work={work} />
             ))}
+          </div>
+          <div className="flex justify-center border-t border-white/5 px-6 py-8 sm:px-10">
+            <Link
+              className="flex h-14 w-full max-w-md items-center justify-center gap-3 rounded-lg bg-[#13c9e8] px-7 text-xs font-black uppercase text-[#071012] transition duration-300 hover:-translate-y-0.5 hover:bg-white"
+              href="/portfolio"
+            >
+              Все проекты <span aria-hidden="true">↗</span>
+            </Link>
           </div>
         </section>
 
@@ -470,7 +488,7 @@ function WorkProjectCard({ work, index }: { work: WorkCard; index: number }) {
       </div>
 
       <div className="relative min-h-[300px] overflow-hidden rounded-[12px] border border-white/5 bg-[#111] lg:min-h-[330px]">
-        <Image alt={work.imageAlt} className="object-cover transition duration-700 hover:scale-105" fill sizes="(max-width: 1024px) 100vw, 420px" src={work.image} />
+        <Image alt={work.imageAlt} className="object-cover transition duration-700 hover:scale-105" fill sizes="(max-width: 1024px) calc(100vw - 28px), 440px" src={work.image} />
       </div>
 
       <div className="grid gap-2">
