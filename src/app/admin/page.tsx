@@ -9,9 +9,11 @@ import {
   type CompanyWorkItem,
 } from "@/lib/db";
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const params = await searchParams;
+
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin/login");
+    redirect(params.from === "login" ? "/admin/login?error=session" : "/admin/login");
   }
 
   let works: CompanyWorkItem[] = [];

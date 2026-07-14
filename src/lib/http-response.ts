@@ -7,6 +7,7 @@ export function redirectSeeOther(location: string) {
 
   return new NextResponse(null, {
     headers: {
+      "Cache-Control": "private, no-store, max-age=0",
       Location: location,
     },
     status: 303,

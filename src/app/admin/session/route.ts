@@ -2,8 +2,10 @@ import { NextRequest } from "next/server";
 
 import {
   ADMIN_COOKIE_NAME,
+  LEGACY_ADMIN_COOKIE_NAME,
   createAdminToken,
   getAdminCookieOptions,
+  getExpiredAdminCookieOptions,
   isAdminAuthConfigured,
 } from "@/lib/admin-auth";
 import { authenticateAdminUser, getDatabaseErrorMessage } from "@/lib/db";
@@ -27,7 +29,13 @@ export async function POST(request: NextRequest) {
       return redirectSeeOther("/admin/login?error=1");
     }
 
-    const response = redirectSeeOther("/admin");
+    const response = redirectSeeOther("/admin?from=login");
+    response.cookies.set(LEGACY_ADMIN_COOKIE_NAME, "", getExpiredAdminCookieOptions("/admin"));
+
+    if (LEGACY_ADMIN_COOKIE_NAME !== ADMIN_COOKIE_NAME) {
+      response.cookies.set(LEGACY_ADMIN_COOKIE_NAME, "", getExpiredAdminCookieOptions());
+    }
+
     response.cookies.set(ADMIN_COOKIE_NAME, createAdminToken(user), getAdminCookieOptions());
 
     return response;

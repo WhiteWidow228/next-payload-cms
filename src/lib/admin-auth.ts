@@ -3,9 +3,10 @@ import { cookies } from "next/headers";
 
 import { getAdminUserById, type AdminUser } from "@/lib/db";
 
-export const ADMIN_COOKIE_NAME = "core_devs_admin";
+export const LEGACY_ADMIN_COOKIE_NAME = "core_devs_admin";
+export const ADMIN_COOKIE_NAME = process.env.NODE_ENV === "production" ? "__Host-core_devs_admin" : LEGACY_ADMIN_COOKIE_NAME;
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
-const SESSION_VERSION = 3;
+const SESSION_VERSION = 4;
 
 type AdminSessionPayload = {
   sub?: string;
@@ -60,9 +61,17 @@ export function getAdminCookieOptions() {
   return {
     httpOnly: true,
     maxAge: MAX_AGE_SECONDS,
-    path: "/admin",
+    path: "/",
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
+  };
+}
+
+export function getExpiredAdminCookieOptions(path = "/") {
+  return {
+    ...getAdminCookieOptions(),
+    maxAge: 0,
+    path,
   };
 }
 

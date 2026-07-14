@@ -13,6 +13,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       ? "Админка не настроена. Добавь ADMIN_SESSION_SECRET в переменные окружения хостинга, а для первого пользователя ADMIN_LOGIN и ADMIN_PASSWORD."
       : params.error === "db"
         ? "Не удалось подключиться к базе пользователей. Проверь DATABASE_URI в переменных окружения хостинга."
+        : params.error === "session"
+          ? "Логин и пароль приняты, но браузер не сохранил сессию. Очисти cookies сайта и попробуй войти снова."
         : params.error
           ? "Неверный логин или пароль."
           : "";
