@@ -242,15 +242,15 @@ export function getDatabaseErrorMessage(error: unknown) {
   const lowerMessage = message.toLowerCase();
 
   if (lowerMessage.includes("connection string is not configured")) {
-    return `Database env variable is missing in Vercel. Add one of: ${DATABASE_ENV_KEYS.join(", ")}.`;
+    return `Database env variable is missing in the hosting environment. Add one of: ${DATABASE_ENV_KEYS.join(", ")}.`;
   }
 
   if (lowerMessage.includes("password authentication failed") || lowerMessage.includes("authentication failed")) {
-    return "Postgres rejected the login or password. Check the current Neon connection string in Vercel variables.";
+    return "Postgres rejected the login or password. Check the current Neon connection string in the hosting variables.";
   }
 
   if (lowerMessage.includes("enotfound") || lowerMessage.includes("getaddrinfo")) {
-    return "Vercel could not resolve the Postgres host. Check that the connection string is copied completely.";
+    return "The hosting server could not resolve the Postgres host. Check that the connection string is copied completely.";
   }
 
   if (

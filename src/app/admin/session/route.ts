@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 import {
   ADMIN_COOKIE_NAME,
@@ -7,6 +7,7 @@ import {
   isAdminAuthConfigured,
 } from "@/lib/admin-auth";
 import { authenticateAdminUser, getDatabaseErrorMessage } from "@/lib/db";
+import { redirectSeeOther } from "@/lib/http-response";
 
 export const runtime = "nodejs";
 
@@ -16,22 +17,22 @@ export async function POST(request: NextRequest) {
   const password = String(formData.get("password") || "");
 
   if (!isAdminAuthConfigured()) {
-    return NextResponse.redirect(new URL("/admin/login?error=setup", request.url), { status: 303 });
+    return redirectSeeOther("/admin/login?error=setup");
   }
 
   try {
     const user = await authenticateAdminUser(login, password);
 
     if (!user) {
-      return NextResponse.redirect(new URL("/admin/login?error=1", request.url), { status: 303 });
+      return redirectSeeOther("/admin/login?error=1");
     }
 
-    const response = NextResponse.redirect(new URL("/admin", request.url), { status: 303 });
+    const response = redirectSeeOther("/admin");
     response.cookies.set(ADMIN_COOKIE_NAME, createAdminToken(user), getAdminCookieOptions());
 
     return response;
   } catch (error) {
     console.error("[admin] Failed to authenticate user", getDatabaseErrorMessage(error));
-    return NextResponse.redirect(new URL("/admin/login?error=db", request.url), { status: 303 });
+    return redirectSeeOther("/admin/login?error=db");
   }
 }

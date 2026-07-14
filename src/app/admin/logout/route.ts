@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-
 import { ADMIN_COOKIE_NAME } from "@/lib/admin-auth";
+import { redirectSeeOther } from "@/lib/http-response";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/admin/login", request.url), { status: 303 });
+export async function POST() {
+  const response = redirectSeeOther("/admin/login");
 
   response.cookies.set(ADMIN_COOKIE_NAME, "", {
     httpOnly: true,
