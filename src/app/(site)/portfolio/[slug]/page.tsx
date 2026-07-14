@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { BreadcrumbStructuredData, JsonLd } from "@/components/StructuredData";
 import { getCompanyWorkItemBySlug } from "@/lib/db";
+import { SITE_NAME, SITE_URL, SOCIAL_IMAGE, absoluteUrl, trimMetaText } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
 
@@ -29,17 +31,36 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   const previewImage = work.image || work.detailImage || undefined;
+  const title = `${trimMetaText(work.title, 48)} — кейс`;
+  const socialTitle = `${title} | ${SITE_NAME}`;
+  const description = trimMetaText(
+    work.summary || `Кейс веб-студии ${SITE_NAME}: задача, решение, дизайн и технологии проекта.`,
+    158,
+  );
+  const images = previewImage
+    ? [{ url: previewImage, alt: work.imageAlt || work.title }]
+    : [SOCIAL_IMAGE];
 
   return {
-    title: `${work.title} - кейс портфолио`,
-    description: work.summary,
+    title,
+    description,
     alternates: {
       canonical: `/portfolio/${work.slug}`,
     },
     openGraph: {
-      title: work.title,
-      description: work.summary,
-      images: previewImage ? [previewImage] : undefined,
+      type: "article",
+      locale: "ru_RU",
+      siteName: SITE_NAME,
+      title: socialTitle,
+      description,
+      url: `/portfolio/${work.slug}`,
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: socialTitle,
+      description,
+      images: [previewImage || SOCIAL_IMAGE.url],
     },
   };
 }
@@ -57,7 +78,32 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
   const aboutParagraphs = projectParagraphs.length ? projectParagraphs : fallbackProjectText;
 
   return (
-    <main className="min-h-screen px-4 py-5 text-white sm:px-6 lg:px-8">
+    <>
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Главная", path: "/" },
+          { name: "Портфолио", path: "/portfolio" },
+          { name: work.title, path: `/portfolio/${work.slug}` },
+        ]}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": `${absoluteUrl(`/portfolio/${work.slug}`)}#project`,
+          url: absoluteUrl(`/portfolio/${work.slug}`),
+          name: work.title,
+          description: trimMetaText(work.summary, 300),
+          image: absoluteUrl(detailImage),
+          inLanguage: "ru-RU",
+          genre: work.category,
+          keywords: work.technologies.join(", "),
+          creator: {
+            "@id": `${SITE_URL}/#organization`,
+          },
+        }}
+      />
+      <main className="min-h-screen px-4 py-5 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1380px]">
         <section className="mt-[50px] rounded-[18px] border border-white/5 bg-[#171717] px-8 pb-8 pt-[50px] sm:px-12 sm:pb-12">
           <div className="flex flex-wrap items-center gap-3">
@@ -133,6 +179,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
           </aside>
         </section>
       </div>
-    </main>
+      </main>
+    </>
   );
 }

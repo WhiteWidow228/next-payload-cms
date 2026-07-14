@@ -1,14 +1,15 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://next-payload-cms-beige.vercel.app";
+import { SITE_URL, absoluteUrl } from "@/lib/site-config";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: "/admin",
+      disallow: ["/admin", "/api/"],
     },
-    sitemap: new URL("/sitemap.xml", siteUrl).toString(),
+    sitemap: absoluteUrl("/sitemap.xml"),
+    host: SITE_URL,
   };
 }

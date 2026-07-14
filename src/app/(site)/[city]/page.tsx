@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { SiteLanding } from "@/components/SiteLanding";
+import { BreadcrumbStructuredData } from "@/components/StructuredData";
+import { createRegionMetadata } from "@/lib/seo-metadata";
 import { cityRegionPages, getRegionPageBySlug } from "@/lib/seo-regions";
 
 export const dynamic = "force-dynamic";
@@ -19,18 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
     return {};
   }
 
-  return {
-    title: page.title,
-    description: page.description,
-    alternates: {
-      canonical: page.href,
-    },
-    openGraph: {
-      title: page.title,
-      description: page.description,
-      url: page.href,
-    },
-  };
+  return createRegionMetadata(page);
 }
 
 export default async function CityPage({ params }: { params: Promise<{ city: string }> }) {
@@ -41,5 +32,15 @@ export default async function CityPage({ params }: { params: Promise<{ city: str
     notFound();
   }
 
-  return <SiteLanding page={page} />;
+  return (
+    <>
+      <BreadcrumbStructuredData
+        items={[
+          { name: "Главная", path: "/" },
+          { name: page.regionLabel, path: page.href },
+        ]}
+      />
+      <SiteLanding page={page} />
+    </>
+  );
 }

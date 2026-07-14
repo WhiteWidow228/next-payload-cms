@@ -2,8 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { listCompanyWorkItems } from "@/lib/db";
 import { seoRegionPages } from "@/lib/seo-regions";
-
-const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL || "https://next-payload-cms-beige.vercel.app";
+import { absoluteUrl } from "@/lib/site-config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let projectRoutes: MetadataRoute.Sitemap = [];
@@ -12,8 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const works = await listCompanyWorkItems();
 
     projectRoutes = works.map((work) => ({
-      url: new URL(`/portfolio/${work.slug}`, siteUrl).toString(),
-      lastModified: new Date(),
+      url: absoluteUrl(`/portfolio/${work.slug}`),
       changeFrequency: "monthly",
       priority: 0.72,
     }));
@@ -23,14 +21,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...seoRegionPages.map((page) => ({
-      url: new URL(page.href, siteUrl).toString(),
-      lastModified: new Date(),
+      url: absoluteUrl(page.href),
       changeFrequency: "weekly" as const,
       priority: page.href === "/" ? 1 : 0.82,
     })),
     {
-      url: new URL("/portfolio", siteUrl).toString(),
-      lastModified: new Date(),
+      url: absoluteUrl("/portfolio"),
       changeFrequency: "weekly",
       priority: 0.86,
     },

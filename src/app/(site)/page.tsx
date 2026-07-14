@@ -1,22 +1,10 @@
-import type { Metadata } from "next";
-
 import { SiteLanding } from "@/components/SiteLanding";
+import { createRegionMetadata } from "@/lib/seo-metadata";
 import { defaultRegionPage } from "@/lib/seo-regions";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: defaultRegionPage.title,
-  description: defaultRegionPage.description,
-  alternates: {
-    canonical: defaultRegionPage.href,
-  },
-  openGraph: {
-    title: defaultRegionPage.title,
-    description: defaultRegionPage.description,
-    url: defaultRegionPage.href,
-  },
-};
+export const metadata = createRegionMetadata(defaultRegionPage);
 
 export default function Home() {
   return <SiteLanding page={defaultRegionPage} />;
